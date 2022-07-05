@@ -1,6 +1,6 @@
-#Cloning Repo
+# Cloning Repo
 
-You can clone this repo using command
+You can clone this repo using
 
 ````
 $ git clone https://github.com/pierrelavalette/tuto-ovrsea.git
