@@ -181,7 +181,6 @@ Let's replace all our Fetch API call instances with a React hook:
 ```
 ```diff
 @@ -52,24 +54,11 @@
- ┊52┊54┊  history,
  ┊53┊55┊  chatId,
  ┊54┊56┊}) => {
 -┊55┊  ┊  const [chat, setChat] = useState<OptionalChatQueryResult>(null);
@@ -248,7 +247,7 @@ Let's replace all our Fetch API call instances with a React hook:
  ┊ 4┊ 4┊import styled from 'styled-components';
 -┊ 5┊  ┊import { useCallback, useState, useMemo } from 'react';
 +┊  ┊ 5┊import { useCallback } from 'react';
- ┊ 6┊ 6┊import { History } from 'history';
+ ┊ 6┊ 6┊import { useNavigate } from 'react-router-dom';
 +┊  ┊ 7┊import gql from 'graphql-tag';
 +┊  ┊ 8┊import { useQuery } from '@apollo/react-hooks';
  ┊ 7┊ 9┊
@@ -270,7 +269,7 @@ Let's replace all our Fetch API call instances with a React hook:
 @@ -77,21 +79,7 @@
  ┊77┊79┊}
  ┊78┊80┊
- ┊79┊81┊const ChatsList: React.FC<ChatsListProps> = ({ history }) => {
+ ┊79┊81┊const ChatsList: React.FC = () => {
 -┊80┊  ┊  const [chats, setChats] = useState<any[]>([]);
 -┊81┊  ┊
 -┊82┊  ┊  useMemo(async () => {
@@ -293,7 +292,7 @@ Let's replace all our Fetch API call instances with a React hook:
 ```
 ```diff
 @@ -100,10 +88,15 @@
- ┊100┊ 88┊    [history]
+ ┊100┊ 88┊    [navigate]
  ┊101┊ 89┊  );
  ┊102┊ 90┊
 +┊   ┊ 91┊  if (data === undefined || data.chats === undefined) {
@@ -342,7 +341,7 @@ We shouldn't see any change at all in the view and the response time, since we'r
 This test is obviously very rough, but the deviation is so big that you don't need any accuracy to emphasize the difference.
 The blue stripes represents the requests made and the time they took. Before we had about 6 request phases, while after we had only 3 of them.
 
-Since we don't use the Fetch API anymore, we will also need to update our tests.
+<!-- Since we don't use the Fetch API anymore, we will also need to update our tests.
 Right now we mock the response from the fetch API, but a more appropriate way would be creating a fake Apollo Client where we will be able to mock the results.
 For that we will install a package called [`apollo-link-mock`](https://www.npmjs.com/package/apollo-link-mock):
 
@@ -568,7 +567,7 @@ Like so, any other component which uses Apollo Client should be wrapped with an 
  ┊ 9┊18┊});
 ```
 
-[}]: #
+[}]: # -->
 
 That's it for this chapter. There's one thing missing to make our `ChatRoomScreen` functional and that would be actually sending a message to the backend and updating the DB. In the next chapter we will learn how to do exactly that with our new Apollo-Client.
 
