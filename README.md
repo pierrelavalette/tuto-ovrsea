@@ -24,7 +24,7 @@ $ yarn start
 ```
 
 This command starts a local development server on port 3456 and opens up a browser window on the tuto page. The page is accessible with the url `http://localhost:3456/`
-You can use this page to read and follo wthe tuto locally, or to add changes to its content. Most changes are reflected live without having to restart the server.
+You can use this page to read and follow the tuto locally, or to add changes to its content. Most changes are reflected live without having to restart the server.
 
 
 ### Build
