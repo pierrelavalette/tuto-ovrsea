@@ -36,9 +36,9 @@ And we will implement a router directly in the `<App />` component:
 -┊ 7┊  ┊  </div>
 +┊  ┊ 7┊  <BrowserRouter>
 +┊  ┊ 8┊    <Routes>
-+┊  ┊ 9┊      <Route exact path="/chats" element={<ChatsListScreen />} />
-+┊  ┊10┊      <Route exact path="/chats/:chatId" component={<ChatRoomScreen />} />
-+┊  ┊12┊    <Route exact path="/" element={<Navigate to="/chats" />} />
++┊  ┊ 9┊      <Route path="/chats" element={<ChatsListScreen />} />
++┊  ┊10┊      <Route path="/chats/:chatId" element={<ChatRoomScreen />} />
++┊  ┊12┊      <Route path="/" element={<Navigate to="/chats" />} />
 +┊  ┊11┊    </Routes>
 +┊  ┊13┊  </BrowserRouter>
  ┊ 8┊14┊);
