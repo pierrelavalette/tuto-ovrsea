@@ -26,7 +26,7 @@ And we will implement a router directly in the `<App />` component:
 ```diff
 @@ -1,10 +1,18 @@
  ┊ 1┊ 1┊import React from 'react';
-+┊  ┊ 2┊import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom';
++┊  ┊ 2┊import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 +┊  ┊ 3┊import ChatRoomScreen from './components/ChatRoomScreen';
  ┊ 2┊ 4┊import ChatsListScreen from './components/ChatsListScreen';
  ┊ 3┊ 5┊
@@ -35,17 +35,15 @@ And we will implement a router directly in the `<App />` component:
 -┊ 6┊  ┊    <ChatsListScreen />
 -┊ 7┊  ┊  </div>
 +┊  ┊ 7┊  <BrowserRouter>
-+┊  ┊ 8┊    <Switch>
-+┊  ┊ 9┊      <Route exact path="/chats" component={ChatsListScreen} />
-+┊  ┊10┊      <Route exact path="/chats/:chatId" component={ChatRoomScreen} />
-+┊  ┊11┊    </Switch>
-+┊  ┊12┊    <Route exact path="/" render={redirectToChats} />
++┊  ┊ 8┊    <Routes>
++┊  ┊ 9┊      <Route exact path="/chats" element={<ChatsListScreen />} />
++┊  ┊10┊      <Route exact path="/chats/:chatId" component={<ChatRoomScreen />} />
++┊  ┊12┊    <Route exact path="/" element={<Navigate to="/chats" />} />
++┊  ┊11┊    </Routes>
 +┊  ┊13┊  </BrowserRouter>
  ┊ 8┊14┊);
  ┊ 9┊15┊
-+┊  ┊16┊const redirectToChats = () => <Redirect to="/chats" />;
-+┊  ┊17┊
- ┊10┊18┊export default App;
+ ┊10┊16┊export default App;
 ```
 
 [}]: #
@@ -365,40 +363,7 @@ Now getting back to the client, let's implement a basic version of the `ChatRoom
 
 #### [__Client__ Step 6.2: Add basic ChatRoomScreen](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/d13d89f74a84758a6fbd675ad2e20bf763100cd7)
 
-##### Changed src&#x2F;App.tsx
-```diff
-@@ -1,5 +1,11 @@
- ┊ 1┊ 1┊import React from 'react';
--┊ 2┊  ┊import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom';
-+┊  ┊ 2┊import {
-+┊  ┊ 3┊  BrowserRouter,
-+┊  ┊ 4┊  Route,
-+┊  ┊ 5┊  Redirect,
-+┊  ┊ 6┊  Switch,
-+┊  ┊ 7┊  RouteComponentProps,
-+┊  ┊ 8┊} from 'react-router-dom';
- ┊ 3┊ 9┊import ChatRoomScreen from './components/ChatRoomScreen';
- ┊ 4┊10┊import ChatsListScreen from './components/ChatsListScreen';
- ┊ 5┊11┊
-```
-```diff
-@@ -7,7 +13,14 @@
- ┊ 7┊13┊  <BrowserRouter>
- ┊ 8┊14┊    <Switch>
- ┊ 9┊15┊      <Route exact path="/chats" component={ChatsListScreen} />
--┊10┊  ┊      <Route exact path="/chats/:chatId" component={ChatRoomScreen} />
-+┊  ┊16┊
-+┊  ┊17┊      <Route
-+┊  ┊18┊        exact
-+┊  ┊19┊        path="/chats/:chatId"
-+┊  ┊20┊        component={({ match }: RouteComponentProps<{ chatId: string }>) => (
-+┊  ┊21┊          <ChatRoomScreen chatId={match.params.chatId} />
-+┊  ┊22┊        )}
-+┊  ┊23┊      />
- ┊11┊24┊    </Switch>
- ┊12┊25┊    <Route exact path="/" render={redirectToChats} />
- ┊13┊26┊  </BrowserRouter>
-```
+
 
 ##### Added src&#x2F;components&#x2F;ChatRoomScreen&#x2F;index.tsx
 ```diff
@@ -421,9 +386,6 @@ Now getting back to the client, let's implement a basic version of the `ChatRoom
 +┊  ┊16┊  }
 +┊  ┊17┊`;
 +┊  ┊18┊
-+┊  ┊19┊interface ChatRoomScreenParams {
-+┊  ┊20┊  chatId: string;
-+┊  ┊21┊}
 +┊  ┊22┊
 +┊  ┊23┊interface ChatQueryMessage {
 +┊  ┊24┊  id: string;
@@ -440,9 +402,9 @@ Now getting back to the client, let's implement a basic version of the `ChatRoom
 +┊  ┊35┊
 +┊  ┊36┊type OptionalChatQueryResult = ChatQueryResult | null;
 +┊  ┊37┊
-+┊  ┊38┊const ChatRoomScreen: React.FC<ChatRoomScreenParams> = ({ chatId }) => {
-+┊  ┊39┊  const [chat, setChat] = useState<OptionalChatQueryResult>(null);
-+┊  ┊40┊
++┊  ┊38┊const ChatRoomScreen: React.FC = () => {
++┊  ┊39┊  const params = useParams<{ chatId: string }>();
++┊  ┊40┊  const { chatId } = params;
 +┊  ┊41┊  useMemo(async () => {
 +┊  ┊42┊    const body = await fetch(`${process.env.REACT_APP_SERVER_URL}/graphql`, {
 +┊  ┊43┊      method: 'POST',
@@ -483,13 +445,12 @@ Now getting back to the client, let's implement a basic version of the `ChatRoom
 
 [}]: #
 
-Note how we used the `match.params.chatId` variable to get the selected chat ID.
-The `match` prop is defined and provided to us by the `<Route />` component, since it interfaces directly with the `ChatRoomScreen`.
-More about that can be read in the [official docs page](https://reacttraining.com/react-router/core/api/match).
+Note how we used the `useParams` hook in `const params = useParams()` to get the selected chat ID.
+The `params` value is provided to us by the `<Routes />` component, which is a parent of our `ChatRoomScreen` component. `<Routes />` is called a **provider** component. A provider defines custom hooks that give access to the values it provides, and exposes these hooks to all its children components (deeply: its children's children can use these hooks too).
+Thus, you need to be a child of `<Routes />` component in order to call `useParams`. Try to call it outside a `Routes` context, and you'll be facing an error.
 
-In many examples online, you can see people pass the `match` prop directly to the component.
-The main issue with that is that this makes the component being usable only by a router, but the truth is that the component
-doesn't care if it's consumed by a router or another parents component as long as they will pass the `chatId` prop.
+More about `useParams` can be read in the [official React Router docs page](https://reactrouter.com/docs/en/v6/hooks/use-params).
+More about context providers on the [official React docs](https://en.reactjs.org/docs/context.html)
 
 So we need to make sure the interface of the ChatRoom component defines those requierements right.
 
@@ -504,35 +465,13 @@ If you'll run the application and type `/chats/1` in the URL bar, this is what y
 
 The view has no styling at all but it should be fixed in a moment.
 To make navigation more convenient we will add an `onClick` listener for each chat item in the `ChatsList`.
-Using the [history](https://reacttraining.com/react-router/core/api/history) object, provided to us by the `<Route />` component,
-we will navigate to the correlated `ChatRoomScreen`:
+Here is another use of context provider. Using the [navigate](https://reactrouter.com/docs/en/v6/hooks/use-navigate#usenavigate) object, provided to us by the `<BroswerRouter />` provider component via the `useNavigate` hook, we will navigate to the correlated `ChatRoomScreen`:
 
-First let's install the `history` package:
-
-    $ yarn add history @types/history
 
 [{]: <helper> (diffStep 6.3 module="client")
 
 #### [__Client__ Step 6.3: Navigate to chat on click](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/7eb7584c64e9658c9ac4c2c6fb6c1ad41cc4361c)
 
-##### Changed package.json
-```diff
-@@ -12,12 +12,14 @@
- ┊12┊12┊    "@testing-library/jest-dom": "5.8.0",
- ┊13┊13┊    "@testing-library/react": "10.0.4",
- ┊14┊14┊    "@testing-library/user-event": "10.3.2",
-+┊  ┊15┊    "@types/history": "4.7.6",
- ┊15┊16┊    "@types/jest": "25.2.3",
- ┊16┊17┊    "@types/node": "14.0.4",
- ┊17┊18┊    "@types/react": "16.9.35",
- ┊18┊19┊    "@types/react-dom": "16.9.8",
- ┊19┊20┊    "@types/react-router-dom": "5.1.5",
- ┊20┊21┊    "@types/styled-components": "5.1.0",
-+┊  ┊22┊    "history": "4.10.1",
- ┊21┊23┊    "jest-environment-jsdom-sixteen": "1.0.3",
- ┊22┊24┊    "jest-fetch-mock": "3.0.3",
- ┊23┊25┊    "moment": "2.25.3",
-```
 
 ##### Changed src&#x2F;components&#x2F;ChatsListScreen&#x2F;ChatsList.tsx
 ```diff
@@ -542,25 +481,21 @@ First let's install the `history` package:
  ┊4┊4┊import styled from 'styled-components';
 -┊5┊ ┊import { useState, useMemo } from 'react';
 +┊ ┊5┊import { useCallback, useState, useMemo } from 'react';
-+┊ ┊6┊import { History } from 'history';
- ┊6┊7┊
- ┊7┊8┊const Container = styled.div`
- ┊8┊9┊  height: calc(100% - 56px);
++┊ ┊5┊import { useNavigate } from 'react-router-dom';
+ ┊6┊6┊
+ ┊7┊7┊const Container = styled.div`
+ ┊8┊8┊  height: calc(100% - 56px);
 ```
 ```diff
 @@ -71,7 +72,11 @@
- ┊71┊72┊  }
- ┊72┊73┊`;
- ┊73┊74┊
--┊74┊  ┊const ChatsList = () => {
-+┊  ┊75┊interface ChatsListProps {
-+┊  ┊76┊  history: History;
-+┊  ┊77┊}
-+┊  ┊78┊
-+┊  ┊79┊const ChatsList: React.FC<ChatsListProps> = ({ history }) => {
- ┊75┊80┊  const [chats, setChats] = useState<any[]>([]);
- ┊76┊81┊
- ┊77┊82┊  useMemo(async () => {
+ ┊71┊71┊  }
+ ┊72┊72┊`;
+ ┊73┊73┊
++┊  ┊74┊const ChatsList: React.FC = () => {
++┊  ┊75┊  const navigate = useNavigate();
+ ┊75┊75┊  const [chats, setChats] = useState<any[]>([]);
+ ┊76┊76┊
+ ┊77┊77┊  useMemo(async () => {
 ```
 ```diff
 @@ -88,11 +93,22 @@
@@ -569,9 +504,9 @@ First let's install the `history` package:
  ┊ 90┊ 95┊
 +┊   ┊ 96┊  const navToChat = useCallback(
 +┊   ┊ 97┊    (chat) => {
-+┊   ┊ 98┊      history.push(`chats/${chat.id}`);
++┊   ┊ 98┊      navigate(`${chat.id}`);
 +┊   ┊ 99┊    },
-+┊   ┊100┊    [history]
++┊   ┊100┊    [navigate]
 +┊   ┊101┊  );
 +┊   ┊102┊
  ┊ 91┊103┊  return (
@@ -589,262 +524,14 @@ First let's install the `history` package:
  ┊ 98┊114┊              src={chat.picture}
 ```
 
-##### Changed src&#x2F;components&#x2F;ChatsListScreen&#x2F;index.tsx
-```diff
-@@ -2,15 +2,20 @@
- ┊ 2┊ 2┊import ChatsNavbar from './ChatsNavbar';
- ┊ 3┊ 3┊import ChatsList from './ChatsList';
- ┊ 4┊ 4┊import styled from 'styled-components';
-+┊  ┊ 5┊import { History } from 'history';
- ┊ 5┊ 6┊
- ┊ 6┊ 7┊const Container = styled.div`
- ┊ 7┊ 8┊  height: 100vh;
- ┊ 8┊ 9┊`;
- ┊ 9┊10┊
--┊10┊  ┊const ChatsListScreen: React.FC = () => (
-+┊  ┊11┊interface ChatsListScreenProps {
-+┊  ┊12┊  history: History;
-+┊  ┊13┊}
-+┊  ┊14┊
-+┊  ┊15┊const ChatsListScreen: React.FC<ChatsListScreenProps> = ({ history }) => (
- ┊11┊16┊  <Container>
- ┊12┊17┊    <ChatsNavbar />
--┊13┊  ┊    <ChatsList />
-+┊  ┊18┊    <ChatsList history={history} />
- ┊14┊19┊  </Container>
- ┊15┊20┊);
-```
+The `useNavigate` object provides a `navigate` function which changes url. It works relatively to the path specified by the closest `<Route path={'my-closest-parent-path'}/>` parent. By default, `navigate('new-path')` adds the input string preced by a `/` to the current url. in this generic case, it will lead to the path `'/my-closest-parent-path/new-path'`.
 
-[}]: #
+More use of `useNavigate` in the [official doc](https://reactrouter.com/docs/en/v6/hooks/use-navigate)
 
-And add test the new logic:
+In our specific case, if our selected chat has an id `1`, then  `navigate('${chat.id}')` found in ChatList, which closest Route parent is `<Route path={'chats'}/>`, will lead to url `/chats/1`.
 
-[{]: <helper> (diffStep 6.4 module="client")
-
-#### [__Client__ Step 6.4: Test new navigation logic](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/7c0236d9a8f15d28fc75e4833ce8c6a361c55721)
-
-##### Changed src&#x2F;components&#x2F;ChatsListScreen&#x2F;ChatsList.test.tsx
-```diff
-@@ -1,10 +1,28 @@
- ┊ 1┊ 1┊import React from 'react';
- ┊ 2┊ 2┊import ReactDOM from 'react-dom';
--┊ 3┊  ┊import { cleanup, render, waitFor } from '@testing-library/react';
-+┊  ┊ 3┊import {
-+┊  ┊ 4┊  cleanup,
-+┊  ┊ 5┊  render,
-+┊  ┊ 6┊  waitFor,
-+┊  ┊ 7┊  fireEvent,
-+┊  ┊ 8┊  screen,
-+┊  ┊ 9┊} from '@testing-library/react';
- ┊ 4┊10┊import ChatsList from './ChatsList';
-+┊  ┊11┊import { createBrowserHistory } from 'history';
- ┊ 5┊12┊
- ┊ 6┊13┊describe('ChatsList', () => {
--┊ 7┊  ┊  afterEach(cleanup);
-+┊  ┊14┊  afterEach(() => {
-+┊  ┊15┊    cleanup();
-+┊  ┊16┊
-+┊  ┊17┊    delete window.location;
-+┊  ┊18┊    window = Object.create(window);
-+┊  ┊19┊    Object.defineProperty(window, 'location', {
-+┊  ┊20┊      value: {
-+┊  ┊21┊        href: '/',
-+┊  ┊22┊      },
-+┊  ┊23┊      writable: true,
-+┊  ┊24┊    });
-+┊  ┊25┊  });
- ┊ 8┊26┊
- ┊ 9┊27┊  it('renders fetched chats data', async () => {
- ┊10┊28┊    fetchMock.mockResponseOnce(
-```
-```diff
-@@ -27,9 +45,13 @@
- ┊27┊45┊    );
- ┊28┊46┊
- ┊29┊47┊    {
--┊30┊  ┊      const { container, getByTestId } = render(<ChatsList />);
-+┊  ┊48┊      const history = createBrowserHistory();
- ┊31┊49┊
--┊32┊  ┊      await waitFor(() => container);
-+┊  ┊50┊      const { container, getByTestId } = render(
-+┊  ┊51┊        <ChatsList history={history} />
-+┊  ┊52┊      );
-+┊  ┊53┊
-+┊  ┊54┊      await waitFor(() => screen.getByTestId('name'));
- ┊33┊55┊
- ┊34┊56┊      expect(getByTestId('name')).toHaveTextContent('Foo Bar');
- ┊35┊57┊      expect(getByTestId('picture')).toHaveAttribute(
-```
-```diff
-@@ -40,4 +62,41 @@
- ┊ 40┊ 62┊      expect(getByTestId('date')).toHaveTextContent('00:00');
- ┊ 41┊ 63┊    }
- ┊ 42┊ 64┊  });
-+┊   ┊ 65┊
-+┊   ┊ 66┊  it('should navigate to the target chat room on chat item click', async () => {
-+┊   ┊ 67┊    fetchMock.mockResponseOnce(
-+┊   ┊ 68┊      JSON.stringify({
-+┊   ┊ 69┊        data: {
-+┊   ┊ 70┊          chats: [
-+┊   ┊ 71┊            {
-+┊   ┊ 72┊              id: 1,
-+┊   ┊ 73┊              name: 'Foo Bar',
-+┊   ┊ 74┊              picture: 'https://localhost:4000/picture.jpg',
-+┊   ┊ 75┊              lastMessage: {
-+┊   ┊ 76┊                id: 1,
-+┊   ┊ 77┊                content: 'Hello',
-+┊   ┊ 78┊                createdAt: new Date('1 Jan 2019 GMT'),
-+┊   ┊ 79┊              },
-+┊   ┊ 80┊            },
-+┊   ┊ 81┊          ],
-+┊   ┊ 82┊        },
-+┊   ┊ 83┊      })
-+┊   ┊ 84┊    );
-+┊   ┊ 85┊
-+┊   ┊ 86┊    const history = createBrowserHistory();
-+┊   ┊ 87┊
-+┊   ┊ 88┊    {
-+┊   ┊ 89┊      const { container, getByTestId } = render(
-+┊   ┊ 90┊        <ChatsList history={history} />
-+┊   ┊ 91┊      );
-+┊   ┊ 92┊
-+┊   ┊ 93┊      await waitFor(() => screen.getByTestId('chat'));
-+┊   ┊ 94┊
-+┊   ┊ 95┊      fireEvent.click(getByTestId('chat'));
-+┊   ┊ 96┊
-+┊   ┊ 97┊      await waitFor(() =>
-+┊   ┊ 98┊        expect(history.location.pathname).toEqual('/chats/1')
-+┊   ┊ 99┊      );
-+┊   ┊100┊    }
-+┊   ┊101┊  });
- ┊ 43┊102┊});
-```
-
-[}]: #
-
-If you'll click on the chat item you'll see that the screen changes very suddenly.
-We can smooth the transition by animating it with CSS.
-Luckily we don't need to implemented such mechanism manually because there's a package that can do that for us - [`react-router-transition`](https://www.npmjs.com/package/react-router-transition):
-
-    $ yarn add react-router-transition
-
-And let's add the mising types for the library:
-
-[{]: <helper> (diffStep 6.5 files="react-app-env.d.ts" module="client")
-
-#### [__Client__ Step 6.5: Animate route switching](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/f276d4feda92c314712a8f58b523ec3fd23b7243)
-
-##### Changed src&#x2F;react-app-env.d.ts
-```diff
-@@ -1 +1,3 @@
- ┊1┊1┊/// <reference types="react-scripts" />
-+┊ ┊2┊
-+┊ ┊3┊declare module 'react-router-transition';
-```
-
-[}]: #
-
-Using this package, we will create a custom `Switch` component that will play an animation for all its subordinate `Route` components.
-The animation is defined by the user using a component called `AnimatedSwitch` as specified in the [package's docs page](http://maisano.github.io/react-router-transition/animated-switch/props).
-So first, let's create our switch component that will play a smooth transition switching routes:
-
-[{]: <helper> (diffStep 6.5 files="AnimatedSwitch" module="client")
-
-#### [__Client__ Step 6.5: Animate route switching](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/f276d4feda92c314712a8f58b523ec3fd23b7243)
-
-##### Added src&#x2F;components&#x2F;AnimatedSwitch.tsx
-```diff
-@@ -0,0 +1,38 @@
-+┊  ┊ 1┊import { Switch } from 'react-router-dom';
-+┊  ┊ 2┊import { AnimatedSwitch, spring } from 'react-router-transition';
-+┊  ┊ 3┊import styled from 'styled-components';
-+┊  ┊ 4┊
-+┊  ┊ 5┊// A workaround to make test pass
-+┊  ┊ 6┊const SwitchComponent =
-+┊  ┊ 7┊  process.env.NODE_ENV === 'test' ? Switch : AnimatedSwitch;
-+┊  ┊ 8┊
-+┊  ┊ 9┊const glide = (val: number) =>
-+┊  ┊10┊  spring(val, {
-+┊  ┊11┊    stiffness: 174,
-+┊  ┊12┊    damping: 24,
-+┊  ┊13┊  });
-+┊  ┊14┊
-+┊  ┊15┊const mapStyles = (styles: any) => ({
-+┊  ┊16┊  transform: `translateX(${styles.offset}%)`,
-+┊  ┊17┊});
-+┊  ┊18┊
-+┊  ┊19┊const MyAnimatedSwitch = styled(SwitchComponent).attrs(() => ({
-+┊  ┊20┊  atEnter: { offset: 100 },
-+┊  ┊21┊  atLeave: { offset: glide(-100) },
-+┊  ┊22┊  atActive: { offset: glide(0) },
-+┊  ┊23┊  mapStyles,
-+┊  ┊24┊}))`
-+┊  ┊25┊  position: relative;
-+┊  ┊26┊  overflow: hidden;
-+┊  ┊27┊  height: 100vh;
-+┊  ┊28┊  width: 100vw;
-+┊  ┊29┊
-+┊  ┊30┊  > div {
-+┊  ┊31┊    position: absolute;
-+┊  ┊32┊    overflow: hidden;
-+┊  ┊33┊    height: 100vh;
-+┊  ┊34┊    width: 100vw;
-+┊  ┊35┊  }
-+┊  ┊36┊`;
-+┊  ┊37┊
-+┊  ┊38┊export default MyAnimatedSwitch;
-```
-
-[}]: #
-
-And then replace it with the main `Switch` component in our app:
-
-[{]: <helper> (diffStep 6.5 files="App" module="client")
-
-#### [__Client__ Step 6.5: Animate route switching](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/f276d4feda92c314712a8f58b523ec3fd23b7243)
-
-##### Changed src&#x2F;App.tsx
-```diff
-@@ -3,15 +3,15 @@
- ┊ 3┊ 3┊  BrowserRouter,
- ┊ 4┊ 4┊  Route,
- ┊ 5┊ 5┊  Redirect,
--┊ 6┊  ┊  Switch,
- ┊ 7┊ 6┊  RouteComponentProps,
- ┊ 8┊ 7┊} from 'react-router-dom';
- ┊ 9┊ 8┊import ChatRoomScreen from './components/ChatRoomScreen';
- ┊10┊ 9┊import ChatsListScreen from './components/ChatsListScreen';
-+┊  ┊10┊import AnimatedSwitch from './components/AnimatedSwitch';
- ┊11┊11┊
- ┊12┊12┊const App: React.FC = () => (
- ┊13┊13┊  <BrowserRouter>
--┊14┊  ┊    <Switch>
-+┊  ┊14┊    <AnimatedSwitch>
- ┊15┊15┊      <Route exact path="/chats" component={ChatsListScreen} />
- ┊16┊16┊
- ┊17┊17┊      <Route
-```
-```diff
-@@ -21,7 +21,7 @@
- ┊21┊21┊          <ChatRoomScreen chatId={match.params.chatId} />
- ┊22┊22┊        )}
- ┊23┊23┊      />
--┊24┊  ┊    </Switch>
-+┊  ┊24┊    </AnimatedSwitch>
- ┊25┊25┊    <Route exact path="/" render={redirectToChats} />
- ┊26┊26┊  </BrowserRouter>
- ┊27┊27┊);
-```
-
-[}]: #
-
-Both components act identically and thus there shall be no special treatment. Behold the new transition effect:
-
-![transition-demo](https://user-images.githubusercontent.com/7648874/54739398-ebb22400-4bf2-11e9-8d4c-2aeb65deeb92.gif)
 
 The final screen will be composed out of 3 components:
-
-
 
 *   A navigation bar.
 *   A messages list.
@@ -873,7 +560,7 @@ along with a back button that will bring us back to the `ChatsListScreen`:
 +┊  ┊ 4┊import React from 'react';
 +┊  ┊ 5┊import { useCallback } from 'react';
 +┊  ┊ 6┊import styled from 'styled-components';
-+┊  ┊ 7┊import { History } from 'history';
++┊  ┊ 7┊import { useNavigate } from 'react-router-dom';
 +┊  ┊ 8┊import { ChatQueryResult } from './index';
 +┊  ┊ 9┊
 +┊  ┊10┊const Container = styled(Toolbar)`
@@ -905,14 +592,14 @@ along with a back button that will bring us back to the `ChatsListScreen`:
 +┊  ┊36┊`;
 +┊  ┊37┊
 +┊  ┊38┊interface ChatNavbarProps {
-+┊  ┊39┊  history: History;
 +┊  ┊40┊  chat: ChatQueryResult;
 +┊  ┊41┊}
 +┊  ┊42┊
-+┊  ┊43┊const ChatNavbar: React.FC<ChatNavbarProps> = ({ chat, history }) => {
++┊  ┊43┊const ChatNavbar: React.FC<ChatNavbarProps> = ({ chat }) => {
++┊  ┊44┊  const navigate = useNavigate();
 +┊  ┊44┊  const navBack = useCallback(() => {
-+┊  ┊45┊    history.replace('/chats');
-+┊  ┊46┊  }, [history]);
++┊  ┊45┊    navigate('/chats', { replace: true });
++┊  ┊46┊  }, [navigate]);
 +┊  ┊47┊
 +┊  ┊48┊  return (
 +┊  ┊49┊    <Container>
@@ -928,7 +615,9 @@ along with a back button that will bring us back to the `ChatsListScreen`:
 +┊  ┊59┊export default ChatNavbar;
 ```
 
-[}]: #
+Note that we use `navigate` function in another way here. Our goal is to go back to a previous url, thus we need to replace our reference path, not to append a new path to it. The second optional input of [navigate](https://reactrouter.com/docs/en/v6/hooks/use-navigate) function set as `{ replace: true }` gives this option.
+
+
 
 Next, would be the `MesagesList` component, where we will see a scrollable list of all the messages of the active chat:
 
@@ -1102,7 +791,7 @@ Now that we have all 3 components, we will put them all together in the main `in
 +┊  ┊ 4┊import ChatNavbar from './ChatNavbar';
 +┊  ┊ 5┊import MessageInput from './MessageInput';
 +┊  ┊ 6┊import MessagesList from './MessagesList';
-+┊  ┊ 7┊import { History } from 'history';
++┊  ┊ 7┊
 +┊  ┊ 8┊
 +┊  ┊ 9┊const Container = styled.div`
 +┊  ┊10┊  background: url(/assets/chat-background.jpg);
@@ -1136,20 +825,6 @@ Now that we have all 3 components, we will put them all together in the main `in
  ┊32┊45┊  picture: string;
 ```
 ```diff
-@@ -35,7 +48,10 @@
- ┊35┊48┊
- ┊36┊49┊type OptionalChatQueryResult = ChatQueryResult | null;
- ┊37┊50┊
--┊38┊  ┊const ChatRoomScreen: React.FC<ChatRoomScreenParams> = ({ chatId }) => {
-+┊  ┊51┊const ChatRoomScreen: React.FC<ChatRoomScreenParams> = ({
-+┊  ┊52┊  history,
-+┊  ┊53┊  chatId,
-+┊  ┊54┊}) => {
- ┊39┊55┊  const [chat, setChat] = useState<OptionalChatQueryResult>(null);
- ┊40┊56┊
- ┊41┊57┊  useMemo(async () => {
-```
-```diff
 @@ -58,18 +74,11 @@
  ┊58┊74┊  if (!chat) return null;
  ┊59┊75┊
@@ -1167,7 +842,7 @@ Now that we have all 3 components, we will put them all together in the main `in
 -┊71┊  ┊      </ul>
 -┊72┊  ┊    </div>
 +┊  ┊77┊    <Container>
-+┊  ┊78┊      <ChatNavbar chat={chat} history={history} />
++┊  ┊78┊      <ChatNavbar chat={chat} />
 +┊  ┊79┊      {chat.messages && <MessagesList messages={chat.messages} />}
 +┊  ┊80┊      <MessageInput />
 +┊  ┊81┊    </Container>
@@ -1175,33 +850,7 @@ Now that we have all 3 components, we will put them all together in the main `in
  ┊74┊83┊};
 ```
 
-[}]: #
 
-And let's also send the new required `history` props to our `ChatRoomScreen` component:
-
-[{]: <helper> (diffStep 6.6 files="App.tsx" module="client")
-
-#### [__Client__ Step 6.6: Implement ChatRoomScreen components](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/d75927b70aa0e2f66bd30d907578a58bd40d8ba3)
-
-##### Changed src&#x2F;App.tsx
-```diff
-@@ -17,8 +17,11 @@
- ┊17┊17┊      <Route
- ┊18┊18┊        exact
- ┊19┊19┊        path="/chats/:chatId"
--┊20┊  ┊        component={({ match }: RouteComponentProps<{ chatId: string }>) => (
--┊21┊  ┊          <ChatRoomScreen chatId={match.params.chatId} />
-+┊  ┊20┊        component={({
-+┊  ┊21┊          match,
-+┊  ┊22┊          history,
-+┊  ┊23┊        }: RouteComponentProps<{ chatId: string }>) => (
-+┊  ┊24┊          <ChatRoomScreen chatId={match.params.chatId} history={history} />
- ┊22┊25┊        )}
- ┊23┊26┊      />
- ┊24┊27┊    </AnimatedSwitch>
-```
-
-[}]: #
 
 The view is complete! However the `MessageInput` is not bound to our messages list.
 We will use the triggered callback to update the chat state, whose changes should appear in the `MessagesList` component in the following render phase:
@@ -1308,7 +957,7 @@ We will use the triggered callback to update the chat state, whose changes shoul
  ┊ 75┊ 93┊
  ┊ 76┊ 94┊  return (
  ┊ 77┊ 95┊    <Container>
- ┊ 78┊ 96┊      <ChatNavbar chat={chat} history={history} />
+ ┊ 78┊ 96┊      <ChatNavbar chat={chat} />
  ┊ 79┊ 97┊      {chat.messages && <MessagesList messages={chat.messages} />}
 -┊ 80┊   ┊      <MessageInput />
 +┊   ┊ 98┊      <MessageInput onSendMessage={onSendMessage} />
@@ -1385,266 +1034,6 @@ We will use `ReactDOM` to retrieve the native HTML element of the container and 
 
 [}]: #
 
-Before we wrap things up, we should also test our components.
-Since the new components have a direct control over the app's history,
-we should also find a way to simulate it in our tests.
-Because `react-dom-router` uses the [`history`](https://www.npmjs.com/package/history) package under the hood,
-that means that we can use that package to inject a custom history object directly into the tested components:
-
-[{]: <helper> (diffStep 6.9 files="components" module="client")
-
-#### [__Client__ Step 6.9: Test ChatRoomScreen child components](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/34b7cd436b24f8501a57192946e298c0a009bbb0)
-
-##### Added src&#x2F;components&#x2F;ChatRoomScreen&#x2F;ChatNavbar.test.tsx
-```diff
-@@ -0,0 +1,80 @@
-+┊  ┊ 1┊import { createMemoryHistory } from 'history';
-+┊  ┊ 2┊import React from 'react';
-+┊  ┊ 3┊import { cleanup, render, waitFor, fireEvent } from '@testing-library/react';
-+┊  ┊ 4┊import ChatNavbar from './ChatNavbar';
-+┊  ┊ 5┊
-+┊  ┊ 6┊describe('ChatNavbar', () => {
-+┊  ┊ 7┊  afterEach(cleanup);
-+┊  ┊ 8┊
-+┊  ┊ 9┊  it('renders chat data', () => {
-+┊  ┊10┊    const time = new Date('1 Jan 2019 GMT');
-+┊  ┊11┊    const chat = {
-+┊  ┊12┊      id: '1',
-+┊  ┊13┊      name: 'Foo Bar',
-+┊  ┊14┊      picture: 'https://localhost:4000/picture.jpg',
-+┊  ┊15┊      messages: [
-+┊  ┊16┊        {
-+┊  ┊17┊          id: '1',
-+┊  ┊18┊          content: 'foo',
-+┊  ┊19┊          createdAt: time,
-+┊  ┊20┊        },
-+┊  ┊21┊        {
-+┊  ┊22┊          id: '2',
-+┊  ┊23┊          content: 'bar',
-+┊  ┊24┊          createdAt: time,
-+┊  ┊25┊        },
-+┊  ┊26┊      ],
-+┊  ┊27┊    };
-+┊  ┊28┊
-+┊  ┊29┊    const history = createMemoryHistory();
-+┊  ┊30┊
-+┊  ┊31┊    {
-+┊  ┊32┊      const { container, getByTestId } = render(
-+┊  ┊33┊        <ChatNavbar chat={chat} history={history} />
-+┊  ┊34┊      );
-+┊  ┊35┊
-+┊  ┊36┊      expect(getByTestId('chat-name')).toHaveTextContent('Foo Bar');
-+┊  ┊37┊      expect(getByTestId('chat-picture')).toHaveAttribute(
-+┊  ┊38┊        'src',
-+┊  ┊39┊        'https://localhost:4000/picture.jpg'
-+┊  ┊40┊      );
-+┊  ┊41┊    }
-+┊  ┊42┊  });
-+┊  ┊43┊
-+┊  ┊44┊  it('goes back on arrow click', async () => {
-+┊  ┊45┊    const time = new Date('1 Jan 2019 GMT');
-+┊  ┊46┊    const chat = {
-+┊  ┊47┊      id: '1',
-+┊  ┊48┊      name: 'Foo Bar',
-+┊  ┊49┊      picture: 'https://localhost:4000/picture.jpg',
-+┊  ┊50┊      messages: [
-+┊  ┊51┊        {
-+┊  ┊52┊          id: '1',
-+┊  ┊53┊          content: 'foo',
-+┊  ┊54┊          createdAt: time,
-+┊  ┊55┊        },
-+┊  ┊56┊        {
-+┊  ┊57┊          id: '2',
-+┊  ┊58┊          content: 'bar',
-+┊  ┊59┊          createdAt: time,
-+┊  ┊60┊        },
-+┊  ┊61┊      ],
-+┊  ┊62┊    };
-+┊  ┊63┊
-+┊  ┊64┊    const history = createMemoryHistory();
-+┊  ┊65┊
-+┊  ┊66┊    history.push('/chats/1');
-+┊  ┊67┊
-+┊  ┊68┊    await waitFor(() => expect(history.location.pathname).toEqual('/chats/1'));
-+┊  ┊69┊
-+┊  ┊70┊    {
-+┊  ┊71┊      const { container, getByTestId } = render(
-+┊  ┊72┊        <ChatNavbar chat={chat} history={history} />
-+┊  ┊73┊      );
-+┊  ┊74┊
-+┊  ┊75┊      fireEvent.click(getByTestId('back-button'));
-+┊  ┊76┊
-+┊  ┊77┊      await waitFor(() => expect(history.location.pathname).toEqual('/chats'));
-+┊  ┊78┊    }
-+┊  ┊79┊  });
-+┊  ┊80┊});
-```
-
-##### Changed src&#x2F;components&#x2F;ChatRoomScreen&#x2F;ChatNavbar.tsx
-```diff
-@@ -47,11 +47,11 @@
- ┊47┊47┊
- ┊48┊48┊  return (
- ┊49┊49┊    <Container>
--┊50┊  ┊      <BackButton onClick={navBack}>
-+┊  ┊50┊      <BackButton data-testid="back-button" onClick={navBack}>
- ┊51┊51┊        <ArrowBackIcon />
- ┊52┊52┊      </BackButton>
--┊53┊  ┊      <Picture src={chat.picture} />
--┊54┊  ┊      <Name>{chat.name}</Name>
-+┊  ┊53┊      <Picture data-testid="chat-picture" src={chat.picture} />
-+┊  ┊54┊      <Name data-testid="chat-name">{chat.name}</Name>
- ┊55┊55┊    </Container>
- ┊56┊56┊  );
- ┊57┊57┊};
-```
-
-##### Added src&#x2F;components&#x2F;ChatRoomScreen&#x2F;MessageInput.test.tsx
-```diff
-@@ -0,0 +1,51 @@
-+┊  ┊ 1┊import { createMemoryHistory } from 'history';
-+┊  ┊ 2┊import React from 'react';
-+┊  ┊ 3┊import { cleanup, render, waitFor, fireEvent } from '@testing-library/react';
-+┊  ┊ 4┊import MessageInput from './MessageInput';
-+┊  ┊ 5┊
-+┊  ┊ 6┊describe('MessageInput;', () => {
-+┊  ┊ 7┊  afterEach(cleanup);
-+┊  ┊ 8┊
-+┊  ┊ 9┊  it('triggers callback on send button click', async () => {
-+┊  ┊10┊    const onSendMessage = jest.fn(() => {});
-+┊  ┊11┊
-+┊  ┊12┊    {
-+┊  ┊13┊      const { container, getByTestId } = render(
-+┊  ┊14┊        <MessageInput onSendMessage={onSendMessage} />
-+┊  ┊15┊      );
-+┊  ┊16┊      const messageInput = getByTestId('message-input');
-+┊  ┊17┊      const sendButton = getByTestId('send-button');
-+┊  ┊18┊
-+┊  ┊19┊      fireEvent.change(messageInput, { target: { value: 'foo' } });
-+┊  ┊20┊
-+┊  ┊21┊      await waitFor(() => messageInput);
-+┊  ┊22┊
-+┊  ┊23┊      fireEvent.click(sendButton);
-+┊  ┊24┊
-+┊  ┊25┊      await waitFor(() => expect(onSendMessage.mock.calls.length).toBe(1));
-+┊  ┊26┊    }
-+┊  ┊27┊  });
-+┊  ┊28┊
-+┊  ┊29┊  it('triggers callback on Enter press', async () => {
-+┊  ┊30┊    const onSendMessage = jest.fn(() => {});
-+┊  ┊31┊
-+┊  ┊32┊    {
-+┊  ┊33┊      const { container, getByTestId } = render(
-+┊  ┊34┊        <MessageInput onSendMessage={onSendMessage} />
-+┊  ┊35┊      );
-+┊  ┊36┊      const messageInput = getByTestId('message-input');
-+┊  ┊37┊
-+┊  ┊38┊      fireEvent.change(messageInput, { target: { value: 'foo' } });
-+┊  ┊39┊
-+┊  ┊40┊      await waitFor(() => messageInput);
-+┊  ┊41┊
-+┊  ┊42┊      fireEvent.keyPress(messageInput, {
-+┊  ┊43┊        key: 'Enter',
-+┊  ┊44┊        code: 13,
-+┊  ┊45┊        charCode: 13,
-+┊  ┊46┊      });
-+┊  ┊47┊
-+┊  ┊48┊      await waitFor(() => expect(onSendMessage.mock.calls.length).toBe(1));
-+┊  ┊49┊    }
-+┊  ┊50┊  });
-+┊  ┊51┊});
-```
-
-##### Changed src&#x2F;components&#x2F;ChatRoomScreen&#x2F;MessageInput.tsx
-```diff
-@@ -70,13 +70,18 @@
- ┊70┊70┊  return (
- ┊71┊71┊    <Container>
- ┊72┊72┊      <ActualInput
-+┊  ┊73┊        data-testid="message-input"
- ┊73┊74┊        type="text"
- ┊74┊75┊        placeholder="Type a message"
- ┊75┊76┊        value={message}
- ┊76┊77┊        onKeyPress={onKeyPress}
- ┊77┊78┊        onChange={onChange}
- ┊78┊79┊      />
--┊79┊  ┊      <SendButton variant="contained" color="primary" onClick={submitMessage}>
-+┊  ┊80┊      <SendButton
-+┊  ┊81┊        data-testid="send-button"
-+┊  ┊82┊        variant="contained"
-+┊  ┊83┊        color="primary"
-+┊  ┊84┊        onClick={submitMessage}>
- ┊80┊85┊        <SendIcon />
- ┊81┊86┊      </SendButton>
- ┊82┊87┊    </Container>
-```
-
-##### Added src&#x2F;components&#x2F;ChatRoomScreen&#x2F;MessagesList.test.tsx
-```diff
-@@ -0,0 +1,41 @@
-+┊  ┊ 1┊import { createMemoryHistory } from 'history';
-+┊  ┊ 2┊import React from 'react';
-+┊  ┊ 3┊import { cleanup, render, getByTestId } from '@testing-library/react';
-+┊  ┊ 4┊import MessagesList from './MessagesList';
-+┊  ┊ 5┊
-+┊  ┊ 6┊describe('MessagesList', () => {
-+┊  ┊ 7┊  afterEach(cleanup);
-+┊  ┊ 8┊
-+┊  ┊ 9┊  const time = new Date('1 Jan 2019 GMT');
-+┊  ┊10┊
-+┊  ┊11┊  it('renders messages data', () => {
-+┊  ┊12┊    const messages = [
-+┊  ┊13┊      {
-+┊  ┊14┊        id: '1',
-+┊  ┊15┊        content: 'foo',
-+┊  ┊16┊        createdAt: time,
-+┊  ┊17┊      },
-+┊  ┊18┊      {
-+┊  ┊19┊        id: '2',
-+┊  ┊20┊        content: 'bar',
-+┊  ┊21┊        createdAt: time,
-+┊  ┊22┊      },
-+┊  ┊23┊    ];
-+┊  ┊24┊
-+┊  ┊25┊    let message1, message2;
-+┊  ┊26┊    {
-+┊  ┊27┊      const { container, getAllByTestId, getByTestId } = render(
-+┊  ┊28┊        <MessagesList messages={messages} />
-+┊  ┊29┊      );
-+┊  ┊30┊      const match = getAllByTestId('message-item');
-+┊  ┊31┊      message1 = match[0];
-+┊  ┊32┊      message2 = match[1];
-+┊  ┊33┊    }
-+┊  ┊34┊
-+┊  ┊35┊    expect(getByTestId(message1, 'message-content')).toHaveTextContent('foo');
-+┊  ┊36┊    expect(getByTestId(message1, 'message-date')).toHaveTextContent('00:00');
-+┊  ┊37┊
-+┊  ┊38┊    expect(getByTestId(message2, 'message-content')).toHaveTextContent('bar');
-+┊  ┊39┊    expect(getByTestId(message2, 'message-date')).toHaveTextContent('00:00');
-+┊  ┊40┊  });
-+┊  ┊41┊});
-```
-
-##### Changed src&#x2F;components&#x2F;ChatRoomScreen&#x2F;MessagesList.tsx
-```diff
-@@ -79,9 +79,11 @@
- ┊79┊79┊  return (
- ┊80┊80┊    <Container ref={selfRef}>
- ┊81┊81┊      {messages.map((message: any) => (
--┊82┊  ┊        <MessageItem key={message.id}>
--┊83┊  ┊          <Contents>{message.content}</Contents>
--┊84┊  ┊          <Timestamp>{moment(message.createdAt).format('HH:mm')}</Timestamp>
-+┊  ┊82┊        <MessageItem data-testid="message-item" key={message.id}>
-+┊  ┊83┊          <Contents data-testid="message-content">{message.content}</Contents>
-+┊  ┊84┊          <Timestamp data-testid="message-date">
-+┊  ┊85┊            {moment(message.createdAt).format('HH:mm')}
-+┊  ┊86┊          </Timestamp>
- ┊85┊87┊        </MessageItem>
- ┊86┊88┊      ))}
- ┊87┊89┊    </Container>
-```
-
-[}]: #
 
 There are many things which are incomplete in the current implementation. The functionality exists in the UI, but no messages are really being sent and stored in the database. In the next chapters we will learn how to:
 
