@@ -500,7 +500,7 @@ We will also use the exported `writeMessage()` function in the `ChatRoomScreen` 
 @@ -7,13 +6,9 @@
  ┊ 7┊ 6┊import MessageInput from './MessageInput';
  ┊ 8┊ 7┊import MessagesList from './MessagesList';
- ┊ 9┊ 8┊import { History } from 'history';
+ ┊ 9┊ 8┊import { useParams } from 'react-dom-router';
 -┊10┊  ┊import {
 -┊11┊  ┊  ChatsQuery,
 -┊12┊  ┊  useGetChatQuery,
@@ -516,16 +516,12 @@ We will also use the exported `writeMessage()` function in the `ChatRoomScreen` 
 ```
 ```diff
 @@ -47,10 +42,6 @@
- ┊47┊42┊  history: History;
- ┊48┊43┊}
  ┊49┊44┊
 -┊50┊  ┊interface ChatsResult {
 -┊51┊  ┊  chats: any[];
 -┊52┊  ┊}
 -┊53┊  ┊
- ┊54┊45┊const ChatRoomScreen: React.FC<ChatRoomScreenParams> = ({
- ┊55┊46┊  history,
- ┊56┊47┊  chatId,
+ ┊54┊45┊const ChatRoomScreen: React.FC = () =>
 ```
 ```diff
 @@ -82,73 +73,7 @@
@@ -620,13 +616,13 @@ One thing missing that you might notice is that we're trying to retrieve the cha
  ┊ 7┊ 7┊  URL: URLResolver,
  ┊ 8┊ 8┊
 +┊  ┊ 9┊  Message: {
-+┊  ┊10┊    chat(message) {
++┊  ┊10┊    chat: (message) => {
 +┊  ┊11┊      return chats.find(c => c.messages.some(m => m === message.id)) || null;
 +┊  ┊12┊    },
 +┊  ┊13┊  },
 +┊  ┊14┊
  ┊ 9┊15┊  Chat: {
- ┊10┊16┊    messages(chat) {
+ ┊10┊16┊    messages: (chat) => {
  ┊11┊17┊      return messages.filter((m) => chat.messages.includes(m.id));
 ```
 
@@ -714,7 +710,7 @@ Finally, we will import the `useCacheService` React hook that we've just created
 
 #### [__Client__ Step 10.5: Use cache service](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/cc710f5160cb3a433393413fefbfe9167477c5ff)
 
-##### Changed src&#x2F;App.test.tsx
+<!-- ##### Changed src&#x2F;App.test.tsx
 ```diff
 @@ -3,9 +3,15 @@
  ┊ 3┊ 3┊import ReactDOM from 'react-dom';
@@ -733,54 +729,40 @@ Finally, we will import the `useCacheService` React hook that we've just created
  ┊ 9┊15┊  const div = document.createElement('div');
  ┊10┊16┊
  ┊11┊17┊  ReactDOM.render(
-```
+``` -->
 
 ##### Changed src&#x2F;App.tsx
 ```diff
 @@ -8,26 +8,31 @@
  ┊ 8┊ 8┊import ChatRoomScreen from './components/ChatRoomScreen';
  ┊ 9┊ 9┊import ChatsListScreen from './components/ChatsListScreen';
- ┊10┊10┊import AnimatedSwitch from './components/AnimatedSwitch';
 +┊  ┊11┊import { useCacheService } from './services/cache.service';
  ┊11┊12┊
 -┊12┊  ┊const App: React.FC = () => (
 -┊13┊  ┊  <BrowserRouter>
--┊14┊  ┊    <AnimatedSwitch>
--┊15┊  ┊      <Route exact path="/chats" component={ChatsListScreen} />
+-┊14┊  ┊    <Routes>
+-┊15┊  ┊      <Route path="/chats" element={<ChatsListScreen />} />
 +┊  ┊13┊const App: React.FC = () => {
 +┊  ┊14┊  useCacheService();
  ┊16┊15┊
 -┊17┊  ┊      <Route
--┊18┊  ┊        exact
 -┊19┊  ┊        path="/chats/:chatId"
--┊20┊  ┊        component={({
--┊21┊  ┊          match,
--┊22┊  ┊          history,
--┊23┊  ┊        }: RouteComponentProps<{ chatId: string }>) => (
--┊24┊  ┊          <ChatRoomScreen chatId={match.params.chatId} history={history} />
--┊25┊  ┊        )}
+-┊20┊  ┊        element={<ChatRoomScreen />}
 -┊26┊  ┊      />
--┊27┊  ┊    </AnimatedSwitch>
--┊28┊  ┊    <Route exact path="/" render={redirectToChats} />
+-┊28┊  ┊      <Route path="/" element={<Navigate to="/chats" />} />
+-┊27┊  ┊    </Routes>
 -┊29┊  ┊  </BrowserRouter>
 -┊30┊  ┊);
 +┊  ┊16┊  return (
 +┊  ┊17┊    <BrowserRouter>
-+┊  ┊18┊      <AnimatedSwitch>
-+┊  ┊19┊        <Route exact path="/chats" component={ChatsListScreen} />
-+┊  ┊20┊
++┊  ┊18┊      <Routes>
++┊  ┊19┊        <Route path="/chats" element={<ChatsListScreen />} />
 +┊  ┊21┊        <Route
-+┊  ┊22┊          exact
-+┊  ┊23┊          path="/chats/:chatId"
-+┊  ┊24┊          component={({
-+┊  ┊25┊            match,
-+┊  ┊26┊            history,
-+┊  ┊27┊          }: RouteComponentProps<{ chatId: string }>) => (
-+┊  ┊28┊            <ChatRoomScreen chatId={match.params.chatId} history={history} />
-+┊  ┊29┊          )}
-+┊  ┊30┊        />
-+┊  ┊31┊      </AnimatedSwitch>
-+┊  ┊32┊      <Route exact path="/" render={redirectToChats} />
++┊  ┊22┊          path="/chats/:chatId"
++┊  ┊23┊          element={<ChatRoomScreen />}
++┊  ┊  ┊        />
++┊  ┊  ┊        <Route path="/" element={<Navigate to="/chats" />} />
++┊  ┊31┊      </Routes>
 +┊  ┊33┊    </BrowserRouter>
 +┊  ┊34┊  );
 +┊  ┊35┊};
