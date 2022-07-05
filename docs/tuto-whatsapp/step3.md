@@ -496,12 +496,12 @@ The result of that approach will look like this, in the context of our ChatsList
 -┊65┊  ┊          <ChatInfo>
 -┊66┊  ┊            <ChatName>{chat.name}</ChatName>
 -┊67┊  ┊            {chat.lastMessage && (
--┊68┊  ┊              <React.Fragment>
+-┊68┊  ┊              <>
 -┊69┊  ┊                <MessageContent>{chat.lastMessage.content}</MessageContent>
 -┊70┊  ┊                <MessageDate>
 -┊71┊  ┊                  {moment(chat.lastMessage.createdAt).format('HH:mm')}
 -┊72┊  ┊                </MessageDate>
--┊73┊  ┊              </React.Fragment>
+-┊73┊  ┊              </>
 -┊74┊  ┊            )}
 -┊75┊  ┊          </ChatInfo>
 -┊76┊  ┊        </StyledListItem>
@@ -527,12 +527,12 @@ The result of that approach will look like this, in the context of our ChatsList
 +┊  ┊74┊            <ChatInfo>
 +┊  ┊75┊              <ChatName>{chat.name}</ChatName>
 +┊  ┊76┊              {chat.lastMessage && (
-+┊  ┊77┊                <React.Fragment>
++┊  ┊77┊                <>
 +┊  ┊78┊                  <MessageContent>{chat.lastMessage.content}</MessageContent>
 +┊  ┊79┊                  <MessageDate>
 +┊  ┊80┊                    {moment(chat.lastMessage.createdAt).format('HH:mm')}
 +┊  ┊81┊                  </MessageDate>
-+┊  ┊82┊                </React.Fragment>
++┊  ┊82┊                </>
 +┊  ┊83┊              )}
 +┊  ┊84┊            </ChatInfo>
 +┊  ┊85┊          </StyledListItem>

@@ -83,7 +83,7 @@ Now we're gonna write a basic test for the `<ChatsList />` component. In the tes
 -┊ 98┊   ┊              <ChatName>{chat.name}</ChatName>
 +┊   ┊102┊              <ChatName data-testid="name">{chat.name}</ChatName>
  ┊ 99┊103┊              {chat.lastMessage && (
- ┊100┊104┊                <React.Fragment>
+ ┊100┊104┊                <>
 -┊101┊   ┊                  <MessageContent>{chat.lastMessage.content}</MessageContent>
 -┊102┊   ┊                  <MessageDate>
 +┊   ┊105┊                  <MessageContent data-testid="content">
@@ -92,7 +92,7 @@ Now we're gonna write a basic test for the `<ChatsList />` component. In the tes
 +┊   ┊108┊                  <MessageDate data-testid="date">
  ┊103┊109┊                    {moment(chat.lastMessage.createdAt).format('HH:mm')}
  ┊104┊110┊                  </MessageDate>
- ┊105┊111┊                </React.Fragment>
+ ┊105┊111┊                </>
 ```
 
 [}]: #

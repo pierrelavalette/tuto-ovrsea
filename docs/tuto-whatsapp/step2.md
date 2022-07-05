@@ -173,7 +173,7 @@ And we will replace the `<ul />` and `<li />` elements with Material's `<List />
 ```diff
 @@ -15,9 +16,9 @@
  ┊15┊16┊              <div>{moment(chat.lastMessage.createdAt).format('HH:mm')}</div>
- ┊16┊17┊            </React.Fragment>
+ ┊16┊17┊            </>
  ┊17┊18┊          )}
 -┊18┊  ┊        </li>
 +┊  ┊19┊        </ListItem>
@@ -441,10 +441,10 @@ Let's finish this off by doing the same in our last component:
 -┊11┊  ┊          <img src={chat.picture} alt="Profile" />
 -┊12┊  ┊          <div>{chat.name}</div>
 -┊13┊  ┊          {chat.lastMessage && (
--┊14┊  ┊            <React.Fragment>
+-┊14┊  ┊            <>
 -┊15┊  ┊              <div>{chat.lastMessage.content}</div>
 -┊16┊  ┊              <div>{moment(chat.lastMessage.createdAt).format('HH:mm')}</div>
--┊17┊  ┊            </React.Fragment>
+-┊17┊  ┊            </>
 -┊18┊  ┊          )}
 -┊19┊  ┊        </ListItem>
 +┊  ┊63┊        <StyledListItem key={chat.id} button>
@@ -452,12 +452,12 @@ Let's finish this off by doing the same in our last component:
 +┊  ┊65┊          <ChatInfo>
 +┊  ┊66┊            <ChatName>{chat.name}</ChatName>
 +┊  ┊67┊            {chat.lastMessage && (
-+┊  ┊68┊              <React.Fragment>
++┊  ┊68┊              <>
 +┊  ┊69┊                <MessageContent>{chat.lastMessage.content}</MessageContent>
 +┊  ┊70┊                <MessageDate>
 +┊  ┊71┊                  {moment(chat.lastMessage.createdAt).format('HH:mm')}
 +┊  ┊72┊                </MessageDate>
-+┊  ┊73┊              </React.Fragment>
++┊  ┊73┊              </>
 +┊  ┊74┊            )}
 +┊  ┊75┊          </ChatInfo>
 +┊  ┊76┊        </StyledListItem>

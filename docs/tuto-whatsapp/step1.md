@@ -1075,7 +1075,7 @@ Now let's try again.
 
 Now we have a syntax error - A JSX return value can't have more then a single root Element.
 So in order to return a root element from the function but still display multiple elements in the same level,
-we can use [React.Fragment](https://reactjs.org/docs/fragments.html) to wrap the returned elements:
+we can use [React.Fragment](https://reactjs.org/docs/fragments.html) to wrap the returned elements. A fragment can be written either with `<>` or simply `<>`. We'll prefer the simple syntax.
 
 [{]: <helper> (diffStep "1.11" module="client")
 
@@ -1089,10 +1089,10 @@ we can use [React.Fragment](https://reactjs.org/docs/fragments.html) to wrap the
  ┊11┊11┊          {chat.lastMessage && (
 -┊12┊  ┊          <div>{chat.lastMessage.content}</div>
 -┊13┊  ┊          <div>{chat.lastMessage.createdAt}</div>
-+┊  ┊12┊            <React.Fragment>
++┊  ┊12┊            <>
 +┊  ┊13┊              <div>{chat.lastMessage.content}</div>
 +┊  ┊14┊              <div>{chat.lastMessage.createdAt}</div>
-+┊  ┊15┊            </React.Fragment>
++┊  ┊15┊            </>
  ┊14┊16┊          )}
  ┊15┊17┊        </li>
  ┊16┊18┊      ))}
@@ -1130,11 +1130,11 @@ And now let's import the library by its name, wrap the value of each chat and ca
 ```diff
 @@ -11,7 +12,7 @@
  ┊11┊12┊          {chat.lastMessage && (
- ┊12┊13┊            <React.Fragment>
+ ┊12┊13┊            <>
  ┊13┊14┊              <div>{chat.lastMessage.content}</div>
 -┊14┊  ┊              <div>{chat.lastMessage.createdAt}</div>
 +┊  ┊15┊              <div>{moment(chat.lastMessage.createdAt).format('HH:mm')}</div>
- ┊15┊16┊            </React.Fragment>
+ ┊15┊16┊            </>
  ┊16┊17┊          )}
  ┊17┊18┊        </li>
 ```

@@ -2355,7 +2355,7 @@ For example, we see that `moment` takes almost _53.49KB_ which is enourmous. In 
 -┊107┊   ┊                    {moment(chat.lastMessage.createdAt).format('HH:mm')}
 +┊   ┊107┊                    {format(chat.lastMessage.createdAt, 'HH:mm')}
  ┊108┊108┊                  </MessageDate>
- ┊109┊109┊                </React.Fragment>
+ ┊109┊109┊                </>
  ┊110┊110┊              )}
 ```
 

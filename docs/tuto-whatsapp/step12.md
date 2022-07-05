@@ -307,10 +307,10 @@ And then we will implement the `UsersList` component which is going to use the `
 +┊  ┊50┊        users.map((user) => (
 +┊  ┊51┊          <UserItem key={user.id} button>
 +┊  ┊52┊            {user !== null && user.picture !== null && (
-+┊  ┊53┊              <React.Fragment>
++┊  ┊53┊              <>
 +┊  ┊54┊                <ProfilePicture data-testid="picture" src={user.picture} />
 +┊  ┊55┊                <Name data-testid="name">{user.name}</Name>
-+┊  ┊56┊              </React.Fragment>
++┊  ┊56┊              </>
 +┊  ┊57┊            )}
 +┊  ┊58┊          </UserItem>
 +┊  ┊59┊        ))}
@@ -927,7 +927,7 @@ To use the new mutation, we will define a new callback called `onUserPick` in th
 +┊  ┊60┊            onClick={onUserPick.bind(null, user)}
 +┊  ┊61┊            button>
  ┊52┊62┊            {user !== null && user.picture !== null && (
- ┊53┊63┊              <React.Fragment>
+ ┊53┊63┊              <>
  ┊54┊64┊                <ProfilePicture data-testid="picture" src={user.picture} />
 ```
 
@@ -1560,7 +1560,7 @@ In the client app, a chat could be removed directly from the `ChatRoomScreen`. O
 ```diff
 @@ -58,6 +90,11 @@
  ┊ 58┊ 90┊          <Name data-testid="chat-name">{chat.name}</Name>
- ┊ 59┊ 91┊        </React.Fragment>
+ ┊ 59┊ 91┊        </>
  ┊ 60┊ 92┊      )}
 +┊   ┊ 93┊      <Rest>
 +┊   ┊ 94┊        <DeleteButton data-testid="delete-button" onClick={handleRemoveChat}>
