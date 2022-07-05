@@ -66,7 +66,7 @@ We will start with generating types for the server.
 
 In the server project, install GraphQL Code Generator via Yarn
 
-    $ yarn add @graphql-codegen/cli --dev
+    $ yarn add @graphql-codegen/cli@1.14.0 --dev
 
 Now GraphQL Code Generator can be used directly from the `scripts` section in the `package.json` file using the `graphql-codegen` binary.
 We're gonna call the code generation script "codegen":
@@ -92,7 +92,7 @@ In the server project, we will generate the `types/graphql.d.ts` file and we wil
 
 Let's install these 2 plugins:
 
-    $ yarn add @graphql-codegen/typescript @graphql-codegen/typescript-resolvers --dev
+    $ yarn add @graphql-codegen/typescript@1.14.0 @graphql-codegen/typescript-resolvers@1.14.0 --dev
 
 And write the `codegen.yml` file:
 
@@ -120,6 +120,31 @@ And write the `codegen.yml` file:
 +┊  ┊15┊        # e.g. Message.createdAt will be of type Date
 +┊  ┊16┊        Date: Date
 +┊  ┊17┊        URL: string
+```
+
+[}]: #
+
+##### Changed package.json
+```diff
+@@ -7,14 +7,19 @@
+ ┊ 7┊ 7┊  },
+ ┊ 8┊ 8┊  "private": true,
+ ┊ 9┊ 9┊  "scripts": {
+ ┊10┊11┊    "start": "ts-node index.ts",
+ ┊11┊12┊    "test": "jest",
++┊  ┊13┊    "codegen": "graphql-codegen",
+ ┊12┊14┊    "format": "prettier \"**/*.ts\" --write"
+ ┊13┊15┊  },
+ ┊14┊16┊  "jest-junit": {
+ ┊15┊17┊    "outputDirectory": "./test-results"
+ ┊16┊18┊  },
+ ┊17┊19┊  "devDependencies": {
++┊  ┊20┊    "@graphql-codegen/cli": "1.14.0",
++┊  ┊21┊    "@graphql-codegen/typescript": "1.14.0",
++┊  ┊22┊    "@graphql-codegen/typescript-resolvers": "1.14.0",
+ ┊18┊23┊    "@types/cors": "2.8.6",
+ ┊19┊24┊    "@types/express": "4.17.6",
+ ┊20┊25┊    "@types/graphql": "14.5.0",
 ```
 
 [}]: #
@@ -160,16 +185,16 @@ Now to make sure we always get the updated types, let's add a task that would ru
 +┊  ┊10┊    "prestart": "yarn codegen",
  ┊10┊11┊    "start": "ts-node index.ts",
  ┊11┊12┊    "test": "jest",
-+┊  ┊13┊    "codegen": "graphql-codegen",
+ ┊  ┊13┊    "codegen": "graphql-codegen",
  ┊12┊14┊    "format": "prettier \"**/*.ts\" --write"
  ┊13┊15┊  },
  ┊14┊16┊  "jest-junit": {
  ┊15┊17┊    "outputDirectory": "./test-results"
  ┊16┊18┊  },
  ┊17┊19┊  "devDependencies": {
-+┊  ┊20┊    "@graphql-codegen/cli": "1.14.0",
-+┊  ┊21┊    "@graphql-codegen/typescript": "1.14.0",
-+┊  ┊22┊    "@graphql-codegen/typescript-resolvers": "1.14.0",
+ ┊  ┊20┊    "@graphql-codegen/cli": "1.14.0",
+ ┊  ┊21┊    "@graphql-codegen/typescript": "1.14.0",
+ ┊  ┊22┊    "@graphql-codegen/typescript-resolvers": "1.14.0",
  ┊18┊23┊    "@types/cors": "2.8.6",
  ┊19┊24┊    "@types/express": "4.17.6",
  ┊20┊25┊    "@types/graphql": "14.5.0",
@@ -265,9 +290,9 @@ Now we can import the `IResolvers` type from the file we've just created and use
 
 [}]: #
 
-We will now repeat the same process in the client with few tweaks. Again, we will install GraphQL Code Generator:
+We will now repeat the same process on **Client** side with few tweaks. Again, we will install GraphQL Code Generator:
 
-    $ yarn add @graphql-codegen/cli --dev
+    $ yarn add @graphql-codegen/cli@1.14.0 --dev
 
 And we will define a script:
 
@@ -282,7 +307,7 @@ GraphQL Code Generator is smart enough to automatically recognize the documents 
 We will be using a plugin called `typescript-react-apollo` to generate React/Apollo-GraphQL hooks that can be used in our function components.
 Let's install the necessary plugins:
 
-    $ yarn add @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations @graphql-codegen/typescript-react-apollo @graphql-codegen/add
+    $ yarn add @graphql-codegen/cli@1.14.0 @graphql-codegen/typescript@1.14.0 @graphql-codegen/typescript-operations@1.14.0 @graphql-codegen/typescript-react-apollo@1.14.0 @graphql-codegen/add@1.14.0
 
 
 And we will write the `codegen.yml` file:
@@ -361,7 +386,6 @@ Let's use those and also remove all the old manual typings:
 @@ -37,7 +36,10 @@
  ┊37┊36┊
  ┊38┊37┊interface ChatNavbarProps {
- ┊39┊38┊  history: History;
 -┊40┊  ┊  chat: ChatQueryResult;
 +┊  ┊39┊  chat?: {
 +┊  ┊40┊    picture?: string | null;
@@ -369,7 +393,7 @@ Let's use those and also remove all the old manual typings:
 +┊  ┊42┊  };
  ┊41┊43┊}
  ┊42┊44┊
- ┊43┊45┊const ChatNavbar: React.FC<ChatNavbarProps> = ({ chat, history }) => {
+ ┊43┊45┊const ChatNavbar: React.FC<ChatNavbarProps> = ({ chat }) => {
 ```
 ```diff
 @@ -50,8 +52,12 @@
@@ -379,10 +403,10 @@ Let's use those and also remove all the old manual typings:
 -┊53┊  ┊      <Picture data-testid="chat-picture" src={chat.picture} />
 -┊54┊  ┊      <Name data-testid="chat-name">{chat.name}</Name>
 +┊  ┊55┊      {chat && chat.picture && chat.name && (
-+┊  ┊56┊        <React.Fragment>
++┊  ┊56┊        <>
 +┊  ┊57┊          <Picture data-testid="chat-picture" src={chat.picture} />
 +┊  ┊58┊          <Name data-testid="chat-name">{chat.name}</Name>
-+┊  ┊59┊        </React.Fragment>
++┊  ┊59┊        </>
 +┊  ┊60┊      )}
  ┊55┊61┊    </Container>
  ┊56┊62┊  );
@@ -429,7 +453,7 @@ Let's use those and also remove all the old manual typings:
  ┊ 7┊ 6┊import ChatNavbar from './ChatNavbar';
  ┊ 8┊ 7┊import MessageInput from './MessageInput';
  ┊ 9┊ 8┊import MessagesList from './MessagesList';
- ┊10┊ 9┊import { History } from 'history';
+ ┊10┊ 9┊import { useParams } from 'react-router-dom';
 +┊  ┊10┊import {
 +┊  ┊11┊  ChatsQuery,
 +┊  ┊12┊  useGetChatQuery,
@@ -461,8 +485,6 @@ Let's use those and also remove all the old manual typings:
 ```
 ```diff
 @@ -41,21 +47,6 @@
- ┊41┊47┊  history: History;
- ┊42┊48┊}
  ┊43┊49┊
 -┊44┊  ┊export interface ChatQueryMessage {
 -┊45┊  ┊  id: string;
@@ -485,9 +507,7 @@ Let's use those and also remove all the old manual typings:
 ```
 ```diff
 @@ -64,14 +55,20 @@
- ┊64┊55┊  history,
- ┊65┊56┊  chatId,
- ┊66┊57┊}) => {
+ ┊66┊57┊  const { chatId } = useParams<{ chatId: string }>(),
 -┊67┊  ┊  const { data } = useQuery<any>(getChatQuery, {
 +┊  ┊58┊  const { data, loading } = useGetChatQuery({
  ┊68┊59┊    variables: { chatId },
@@ -622,7 +642,7 @@ Let's use those and also remove all the old manual typings:
  ┊164┊167┊
  ┊165┊168┊  return (
  ┊166┊169┊    <Container>
- ┊167┊170┊      <ChatNavbar chat={chat} history={history} />
+ ┊167┊170┊      <ChatNavbar chat={chat} />
 -┊168┊   ┊      {chat.messages && <MessagesList messages={chat.messages} />}
 +┊   ┊171┊      {chat?.messages && <MessagesList messages={chat.messages} />}
  ┊169┊172┊      <MessageInput onSendMessage={onSendMessage} />
@@ -635,7 +655,7 @@ Let's use those and also remove all the old manual typings:
 @@ -4,8 +4,7 @@
  ┊ 4┊ 4┊import styled from 'styled-components';
  ┊ 5┊ 5┊import { useCallback } from 'react';
- ┊ 6┊ 6┊import { History } from 'history';
+ ┊ 6┊ 6┊import { useNavigate } from 'react-router-dom';
 -┊ 7┊  ┊import { useQuery } from '@apollo/react-hooks';
 -┊ 8┊  ┊import * as queries from '../../graphql/queries';
 +┊  ┊ 7┊import { useChatsQuery } from '../../graphql/types';
@@ -647,16 +667,16 @@ Let's use those and also remove all the old manual typings:
 @@ -64,8 +63,6 @@
  ┊64┊63┊}
  ┊65┊64┊
- ┊66┊65┊const ChatsList: React.FC<ChatsListProps> = ({ history }) => {
+ ┊66┊65┊const ChatsList: React.FC = () => {
 -┊67┊  ┊  const { data } = useQuery<any>(queries.chats);
 -┊68┊  ┊
  ┊69┊66┊  const navToChat = useCallback(
  ┊70┊67┊    (chat) => {
- ┊71┊68┊      history.push(`chats/${chat.id}`);
+ ┊71┊68┊      navigate(`${chat.id}`);
 ```
 ```diff
 @@ -73,6 +70,8 @@
- ┊73┊70┊    [history]
+ ┊73┊70┊    [navigate]
  ┊74┊71┊  );
  ┊75┊72┊
 +┊  ┊73┊  const { data } = useChatsQuery();
