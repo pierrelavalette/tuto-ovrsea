@@ -477,77 +477,7 @@ Now we will update the resolvers to fetch data relatively to the current user lo
  ┊ 80┊113┊
 ```
 
-##### Changed tests&#x2F;mutations&#x2F;addMessage.test.ts
-```diff
-@@ -1,7 +1,7 @@
- ┊1┊1┊import { createTestClient } from 'apollo-server-testing';
- ┊2┊2┊import { ApolloServer, PubSub, gql } from 'apollo-server-express';
- ┊3┊3┊import schema from '../../schema';
--┊4┊ ┊import { resetDb } from '../../db';
-+┊ ┊4┊import { resetDb, users } from '../../db';
- ┊5┊5┊
- ┊6┊6┊describe('Mutation.addMessage', () => {
- ┊7┊7┊  beforeEach(resetDb);
-```
-```diff
-@@ -9,7 +9,10 @@
- ┊ 9┊ 9┊  it('should add message to specified chat', async () => {
- ┊10┊10┊    const server = new ApolloServer({
- ┊11┊11┊      schema,
--┊12┊  ┊      context: () => ({ pubsub: new PubSub() }),
-+┊  ┊12┊      context: () => ({
-+┊  ┊13┊        pubsub: new PubSub(),
-+┊  ┊14┊        currentUser: users[0],
-+┊  ┊15┊      }),
- ┊13┊16┊    });
- ┊14┊17┊
- ┊15┊18┊    const { query, mutate } = createTestClient(server);
-```
 
-##### Changed tests&#x2F;queries&#x2F;getChat.test.ts
-```diff
-@@ -1,10 +1,16 @@
- ┊ 1┊ 1┊import { createTestClient } from 'apollo-server-testing';
- ┊ 2┊ 2┊import { ApolloServer, gql } from 'apollo-server-express';
- ┊ 3┊ 3┊import schema from '../../schema';
-+┊  ┊ 4┊import { users } from '../../db';
- ┊ 4┊ 5┊
- ┊ 5┊ 6┊describe('Query.chat', () => {
- ┊ 6┊ 7┊  it('should fetch specified chat', async () => {
--┊ 7┊  ┊    const server = new ApolloServer({ schema });
-+┊  ┊ 8┊    const server = new ApolloServer({
-+┊  ┊ 9┊      schema,
-+┊  ┊10┊      context: () => ({
-+┊  ┊11┊        currentUser: users[0],
-+┊  ┊12┊      }),
-+┊  ┊13┊    });
- ┊ 8┊14┊
- ┊ 9┊15┊    const { query } = createTestClient(server);
- ┊10┊16┊
-```
-
-##### Changed tests&#x2F;queries&#x2F;getChats.test.ts
-```diff
-@@ -1,10 +1,16 @@
- ┊ 1┊ 1┊import { createTestClient } from 'apollo-server-testing';
- ┊ 2┊ 2┊import { ApolloServer, gql } from 'apollo-server-express';
- ┊ 3┊ 3┊import schema from '../../schema';
-+┊  ┊ 4┊import { users } from '../../db';
- ┊ 4┊ 5┊
- ┊ 5┊ 6┊describe('Query.chats', () => {
- ┊ 6┊ 7┊  it('should fetch all chats', async () => {
--┊ 7┊  ┊    const server = new ApolloServer({ schema });
-+┊  ┊ 8┊    const server = new ApolloServer({
-+┊  ┊ 9┊      schema,
-+┊  ┊10┊      context: () => ({
-+┊  ┊11┊        currentUser: users[0],
-+┊  ┊12┊      }),
-+┊  ┊13┊    });
- ┊ 8┊14┊
- ┊ 9┊15┊    const { query } = createTestClient(server);
-```
-
-[}]: #
 
 Now if we will get back to the app and refresh the page, we should see a new chats list which is only relevant to Ray Edwards.
 Earlier in this chapter, we've defined a new `isMine` field on the `Message` type.
@@ -954,20 +884,6 @@ All the auth related logic should go into a dedicated service since it can serve
 
 #### [__Client__ Step 11.3: Add basic auth.service](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/65c43bd0e4aa01c1df4f552ec501c3ac56687cb1)
 
-##### Changed src&#x2F;App.test.tsx
-```diff
-@@ -9,8 +9,8 @@
- ┊ 9┊ 9┊  const client = mockApolloClient([
- ┊10┊10┊    {
- ┊11┊11┊      request: { query: subscriptions.messageAdded },
--┊12┊  ┊      result: { data: {} }
--┊13┊  ┊    }
-+┊  ┊12┊      result: { data: {} },
-+┊  ┊13┊    },
- ┊14┊14┊  ]);
- ┊15┊15┊  const div = document.createElement('div');
- ┊16┊16┊
-```
 
 ##### Added src&#x2F;services&#x2F;auth.service.tsx
 ```diff
@@ -1021,7 +937,7 @@ Once it does so, we will be proceeded to the `ChatsListScreen`. First we will do
 +┊   ┊  4┊import { useCallback, useState } from 'react';
 +┊   ┊  5┊import styled from 'styled-components';
 +┊   ┊  6┊import { signIn } from '../../services/auth.service';
-+┊   ┊  7┊import { RouteComponentProps } from 'react-router-dom';
++┊   ┊  7┊import { useNavigate } from 'react-router-dom';
 +┊   ┊  8┊
 +┊   ┊  9┊const Container = styled.div`
 +┊   ┊ 10┊  height: 100%;
@@ -1130,7 +1046,8 @@ Once it does so, we will be proceeded to the `ChatsListScreen`. First we will do
 +┊   ┊113┊  }
 +┊   ┊114┊`;
 +┊   ┊115┊
-+┊   ┊116┊const AuthScreen: React.FC<RouteComponentProps<any>> = ({ history }) => {
++┊   ┊116┊const AuthScreen: React.FC = () => {
++┊   ┊116┊  const navigate = useNavigate();
 +┊   ┊117┊  const [userId, setUserId] = useState('');
 +┊   ┊118┊
 +┊   ┊119┊  const onUserIdChange = useCallback(({ target }) => {
@@ -1143,7 +1060,7 @@ Once it does so, we will be proceeded to the `ChatsListScreen`. First we will do
 +┊   ┊126┊
 +┊   ┊127┊  const handleSignIn = useCallback(() => {
 +┊   ┊128┊    signIn(userId).then(() => {
-+┊   ┊129┊      history.replace('/chats');
++┊   ┊129┊      navigate('/chats', { replace: true });
 +┊   ┊130┊    });
 +┊   ┊131┊  }, [userId, history]);
 +┊   ┊132┊
@@ -1186,7 +1103,7 @@ Once it does so, we will be proceeded to the `ChatsListScreen`. First we will do
 
 [}]: #
 
-Accordingly we will define a new `/sign-in` route that will render the `AuthScreen` we’re under that path name:
+Accordingly we will define a new `/sign/in` route that will render the `AuthScreen` we’re under that path name:
 
 [{]: <helper> (diffStep 11.4 files="App" module="client")
 
@@ -1195,8 +1112,7 @@ Accordingly we will define a new `/sign-in` route that will render the `AuthScre
 ##### Changed src&#x2F;App.tsx
 ```diff
 @@ -5,6 +5,7 @@
- ┊ 5┊ 5┊  Redirect,
- ┊ 6┊ 6┊  RouteComponentProps,
+
  ┊ 7┊ 7┊} from 'react-router-dom';
 +┊  ┊ 8┊import AuthScreen from './components/AuthScreen';
  ┊ 8┊ 9┊import ChatRoomScreen from './components/ChatRoomScreen';
@@ -1207,9 +1123,9 @@ Accordingly we will define a new `/sign-in` route that will render the `AuthScre
 @@ -16,6 +17,7 @@
  ┊16┊17┊  return (
  ┊17┊18┊    <BrowserRouter>
- ┊18┊19┊      <AnimatedSwitch>
-+┊  ┊20┊        <Route exact path="/sign-(in|up)" component={AuthScreen} />
- ┊19┊21┊        <Route exact path="/chats" component={ChatsListScreen} />
+ ┊18┊19┊      <Routes>
++┊  ┊20┊        <Route path="/sign/(in|up)" element={<AuthScreen />} />
+ ┊19┊21┊        <Route path="/chats" element={<ChatsListScreen />} />
  ┊20┊22┊
  ┊21┊23┊        <Route
 ```
@@ -1220,7 +1136,7 @@ This is how the new screen should look like:
 
 ![auth-screen](https://user-images.githubusercontent.com/7648874/55606715-7a56a180-57ac-11e9-8eea-2da5931cccf5.png)
 
-Now let’s type the `/sign-in` route in our browser’s navigation bar and assign a user ID, see how it affects what chats we see in the `ChatsListScreen`. You’ve probably noticed that there’s no way to escape from the `/chats` route unless we edit the browser’s navigation bar manually. To fix that, we will add a new sign-out button to the navbar of the `ChatsListScreen` that will call the `signOut()` method anytime we click on it, and will bring us back to the `AuthScreen`:
+Now let’s type the `/sign/in` route in our browser’s navigation bar and assign a user ID, see how it affects what chats we see in the `ChatsListScreen`. You’ve probably noticed that there’s no way to escape from the `/chats` route unless we edit the browser’s navigation bar manually. To fix that, we will add a new sign-out button to the navbar of the `ChatsListScreen` that will call the `signOut()` method anytime we click on it, and will bring us back to the `AuthScreen`:
 
 [{]: <helper> (diffStep 11.5 module="client")
 
@@ -1236,7 +1152,7 @@ Now let’s type the `/sign-in` route in our browser’s navigation bar and assi
 +┊  ┊ 4┊import SignOutIcon from '@material-ui/icons/PowerSettingsNew';
 +┊  ┊ 5┊import { useCallback } from 'react';
 +┊  ┊ 6┊import { useSignOut } from '../../services/auth.service';
-+┊  ┊ 7┊import { History } from 'history';
++┊  ┊ 7┊import { useNavigate } from 'react-router-dom';
  ┊ 4┊ 8┊
  ┊ 5┊ 9┊const Container = styled(Toolbar)`
 +┊  ┊10┊  display: flex;
@@ -1255,16 +1171,13 @@ Now let’s type the `/sign-in` route in our browser’s navigation bar and assi
 +┊  ┊22┊  color: var(--primary-text) !important;
 +┊  ┊23┊`;
 +┊  ┊24┊
-+┊  ┊25┊interface ChildComponentProps {
-+┊  ┊26┊  history: History;
-+┊  ┊27┊}
-+┊  ┊28┊
-+┊  ┊29┊const ChatsNavbar: React.FC<ChildComponentProps> = ({ history }) => {
++┊  ┊29┊const ChatsNavbar: React.FC = () => {
++┊  ┊30┊  const navigate = useNavigate();
 +┊  ┊30┊  const signOut = useSignOut();
 +┊  ┊31┊
 +┊  ┊32┊  const handleSignOut = useCallback(() => {
 +┊  ┊33┊    signOut().then(() => {
-+┊  ┊34┊      history.replace('/sign-in');
++┊  ┊34┊      navigate('/sign/in', { replace: true });
 +┊  ┊35┊    });
 +┊  ┊36┊  }, [history, signOut]);
 +┊  ┊37┊
@@ -1281,22 +1194,7 @@ Now let’s type the `/sign-in` route in our browser’s navigation bar and assi
  ┊14┊48┊export default ChatsNavbar;
 ```
 
-##### Changed src&#x2F;components&#x2F;ChatsListScreen&#x2F;index.tsx
-```diff
-@@ -14,7 +14,7 @@
- ┊14┊14┊
- ┊15┊15┊const ChatsListScreen: React.FC<ChatsListScreenProps> = ({ history }) => (
- ┊16┊16┊  <Container>
--┊17┊  ┊    <ChatsNavbar />
-+┊  ┊17┊    <ChatsNavbar history={history} />
- ┊18┊18┊    <ChatsList history={history} />
- ┊19┊19┊  </Container>
- ┊20┊20┊);
-```
-
-[}]: #
-
-At this point we’ve got everything we need, but we will add a small touch to improve the user experience and make it feel more complete. Users who aren’t logged in shouldn’t be able to view any screen besides the `AuthScreen`. First they need to sign-in, and only then they will be able to view the `ChatsListScreen` and `ChatRoomScreen`. To achieve that, we will wrap all the components which require authentication before we provide them into their routes. This wrap will basically check whether a user is logged in or not by reading the cookies, and if not we will be redirected to the `/sign-in` route. Let’s implement that wrap in the `auth.service` and call it `withAuth()`:
+At this point we’ve got everything we need, but we will add a small touch to improve the user experience and make it feel more complete. Users who aren’t logged in shouldn’t be able to view any screen besides the `AuthScreen`. First they need to sign-in, and only then they will be able to view the `ChatsListScreen` and `ChatRoomScreen`. To achieve that, we will wrap all the components which require authentication before we provide them into their routes. This wrap will basically check whether a user is logged in or not by reading the cookies, and if not we will be redirected to the `/sign/in` route. Let’s implement that wrapper component in the `auth.service` and call it `WithAuth`:
 
 [{]: <helper> (diffStep 11.6 files="auth.service" module="client")
 
@@ -1305,28 +1203,27 @@ At this point we’ve got everything we need, but we will add a small touch to i
 ##### Changed src&#x2F;services&#x2F;auth.service.tsx
 ```diff
 @@ -1,5 +1,26 @@
-+┊  ┊ 1┊import React from 'react';
++┊  ┊ 1┊import React, { PropsWithChildren } from 'react';
  ┊ 1┊ 2┊import { useCallback } from 'react';
  ┊ 2┊ 3┊import { useApolloClient } from '@apollo/react-hooks';
-+┊  ┊ 4┊import { Redirect } from 'react-router-dom';
++┊  ┊ 4┊import { Navigate, useLocation } from 'react-router-dom';
 +┊  ┊ 5┊import { useCacheService } from './cache.service';
 +┊  ┊ 6┊
-+┊  ┊ 7┊export const withAuth = <P extends object>(
-+┊  ┊ 8┊  Component: React.ComponentType<P>
-+┊  ┊ 9┊) => {
-+┊  ┊10┊  return (props: any) => {
-+┊  ┊11┊    if (!isSignedIn()) {
-+┊  ┊12┊      if (props.history.location.pathname === '/sign-in') {
-+┊  ┊13┊        return null;
-+┊  ┊14┊      }
++┊  ┊ 7┊export const WithAuth: React.FC = ({
++┊  ┊ 8┊  children,
++┊  ┊ 9┊}: PropsWithChildren<{}>) => {
++┊  ┊10┊  const location = useLocation();
++┊  ┊11┊  if (!isSignedIn()) {
++┊  ┊12┊    if (location.pathname === '/sign/in') {
++┊  ┊13┊      return null;
++┊  ┊14┊    }
 +┊  ┊15┊
-+┊  ┊16┊      return <Redirect to="/sign-in" />;
-+┊  ┊17┊    }
++┊  ┊16┊    return <Navigate to="/sign/in" />;
++┊  ┊17┊  }
 +┊  ┊18┊
-+┊  ┊19┊    useCacheService();
++┊  ┊19┊  useCacheService();
 +┊  ┊20┊
-+┊  ┊21┊    return <Component {...(props as P)} />;
-+┊  ┊22┊  };
++┊  ┊21┊  return <Component {...(props as P)} />;
 +┊  ┊23┊};
  ┊ 3┊24┊
  ┊ 4┊25┊export const signIn = (currentUserId: string) => {
@@ -1335,7 +1232,7 @@ At this point we’ve got everything we need, but we will add a small touch to i
 
 [}]: #
 
-We will use this function to wrap the right components in our app’s router. Note that since we used the `useCacheService()` directly in the `withAuth()` method, there’s no need to use it in the router itself anymore. This makes a lot more sense since there’s no need to stay subscribed to data that you're not gonna receive from the first place unless you’re logged-in:
+We will use this component to wrap the right components in our app’s router. Note that since we used the `useCacheService()` directly in the `WithAuth` component, there’s no need to use it in the router itself anymore. This makes a lot more sense since there’s no need to stay subscribed to data that you're not gonna receive from the first place unless you’re logged-in:
 
 [{]: <helper> (diffStep 11.6 files="App" module="client")
 
@@ -1344,51 +1241,49 @@ We will use this function to wrap the right components in our app’s router. No
 ##### Changed src&#x2F;App.tsx
 ```diff
 @@ -9,32 +9,27 @@
- ┊ 9┊ 9┊import ChatRoomScreen from './components/ChatRoomScreen';
- ┊10┊10┊import ChatsListScreen from './components/ChatsListScreen';
- ┊11┊11┊import AnimatedSwitch from './components/AnimatedSwitch';
 -┊12┊  ┊import { useCacheService } from './services/cache.service';
-+┊  ┊12┊import { withAuth } from './services/auth.service';
++┊  ┊12┊import { WithAuth } from './services/auth.service';
  ┊13┊13┊
 -┊14┊  ┊const App: React.FC = () => {
 -┊15┊  ┊  useCacheService();
 +┊  ┊14┊const App: React.FC = () => (
 +┊  ┊15┊  <BrowserRouter>
-+┊  ┊16┊    <AnimatedSwitch>
-+┊  ┊17┊      <Route exact path="/sign-(in|up)" component={AuthScreen} />
-+┊  ┊18┊      <Route exact path="/chats" component={withAuth(ChatsListScreen)} />
++┊  ┊16┊    <Routes>
++┊  ┊16┊      <Route path="/sign/(in|up)" element={<AuthScreen />}>
++┊  ┊17┊      <Route
++┊  ┊17┊        path="/chats"
++┊  ┊18┊        element={
++┊  ┊18┊          <WithAuth>
++┊  ┊18┊            <ChatsListScreen />
++┊  ┊18┊          </WithAuth>
++┊  ┊18┊        }
++┊  ┊18┊      />
  ┊16┊19┊
 -┊17┊  ┊  return (
 -┊18┊  ┊    <BrowserRouter>
--┊19┊  ┊      <AnimatedSwitch>
--┊20┊  ┊        <Route exact path="/sign-(in|up)" component={AuthScreen} />
--┊21┊  ┊        <Route exact path="/chats" component={ChatsListScreen} />
--┊22┊  ┊
+-┊19┊  ┊      <Routes>
+-┊20┊  ┊        <Route path="/sign-(in|up)" element={<AuthScreen />} />
+-┊21┊  ┊        <Route path="/chats" element={<ChatsListScreen />} />
 -┊23┊  ┊        <Route
--┊24┊  ┊          exact
 -┊25┊  ┊          path="/chats/:chatId"
--┊26┊  ┊          component={({
--┊27┊  ┊            match,
--┊28┊  ┊            history,
--┊29┊  ┊          }: RouteComponentProps<{ chatId: string }>) => (
+-┊26┊  ┊          element={<ChatRoomScreen/>}
 +┊  ┊20┊      <Route
-+┊  ┊21┊        exact
 +┊  ┊22┊        path="/chats/:chatId"
-+┊  ┊23┊        component={withAuth(
-+┊  ┊24┊          ({ match, history }: RouteComponentProps<{ chatId: string }>) => (
- ┊30┊25┊            <ChatRoomScreen chatId={match.params.chatId} history={history} />
--┊31┊  ┊          )}
++┊  ┊23┊        element={
++┊  ┊24┊          <WithAuth>
+ ┊30┊25┊            <ChatRoomScreen />
++┊  ┊24┊          </WithAuth>
++┊  ┊24┊        }
+-┊31┊  ┊          }
 -┊32┊  ┊        />
--┊33┊  ┊      </AnimatedSwitch>
--┊34┊  ┊      <Route exact path="/" render={redirectToChats} />
+-┊34┊  ┊        <Route path="/" element={<Navigate to ="/chats" />} />
+-┊33┊  ┊      </Routes>
 -┊35┊  ┊    </BrowserRouter>
 -┊36┊  ┊  );
 -┊37┊  ┊};
-+┊  ┊26┊          )
-+┊  ┊27┊        )}
 +┊  ┊28┊      />
-+┊  ┊29┊    </AnimatedSwitch>
-+┊  ┊30┊    <Route exact path="/" render={redirectToChats} />
++┊  ┊30┊      <Route path="/" element={<Navigate to ="/chats" />} />
++┊  ┊29┊    </Routes>
 +┊  ┊31┊  </BrowserRouter>
 +┊  ┊32┊);
  ┊38┊33┊
@@ -1398,7 +1293,7 @@ We will use this function to wrap the right components in our app’s router. No
 
 [}]: #
 
-Assuming that you’re not logged-in, if you’ll try to force navigate to the `/chats` route you should be automatically redirected to the `/sign-in` form. We will finish the chapter here as we wanna keep things simple and gradual. It’s true that we haven’t implemented true authentication, but that would be addressed soon further in this tutorial.
+Assuming that you’re not logged-in, if you’ll try to force navigate to the `/chats` route you should be automatically redirected to the `/sign/in` form. We will finish the chapter here as we wanna keep things simple and gradual. It’s true that we haven’t implemented true authentication, but that would be addressed soon further in this tutorial.
 
 
 
