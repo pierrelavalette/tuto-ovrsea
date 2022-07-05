@@ -116,7 +116,7 @@ When we add a message, we first find the right chat,
 then we generate a new message ID that is bigger then all the previous messages (when we'll move to a real database it will do that for us)
 and push the message into the right chat.
 
-In terms of testing, we will use a temporary solution for now to reset the DB each time we test a mutation. Since we make a modification in the DB, we need to make sure that each test is completely agnostic and doesn't affect one another, thus, we will export a `resetDB()` method from our `db.ts` module:
+<!-- In terms of testing, we will use a temporary solution for now to reset the DB each time we test a mutation. Since we make a modification in the DB, we need to make sure that each test is completely agnostic and doesn't affect one another, thus, we will export a `resetDB()` method from our `db.ts` module:
 
 [{]: <helper> (diffStep 5.2 files="db.ts" module="server")
 
@@ -349,7 +349,7 @@ And we will use the `beforeEach()` test hook to reset the `chats` and `messages`
 +┊  ┊49┊});
 ```
 
-[}]: #
+[}]: # -->
 
 Now we have the infrastructure set for sending a new message and we can start using it in our client.
 
@@ -403,11 +403,9 @@ This is how the component should look like:
 +┊  ┊42┊
  ┊33┊43┊interface ChatRoomScreenParams {
  ┊34┊44┊  chatId: string;
- ┊35┊45┊  history: History;
 ```
 ```diff
 @@ -54,35 +64,42 @@
- ┊ 54┊ 64┊  history,
  ┊ 55┊ 65┊  chatId,
  ┊ 56┊ 66┊}) => {
 -┊ 57┊   ┊  const client = useApolloClient();
@@ -542,7 +540,7 @@ This is how it should look like:
 @@ -7,6 +7,7 @@
  ┊ 7┊ 7┊import MessageInput from './MessageInput';
  ┊ 8┊ 8┊import MessagesList from './MessagesList';
- ┊ 9┊ 9┊import { History } from 'history';
+ ┊ 9┊ 9┊import { useParams } from 'react-router-dom';
 +┊  ┊10┊import * as queries from '../../graphql/queries';
  ┊10┊11┊
  ┊11┊12┊const Container = styled.div`
@@ -557,9 +555,7 @@ This is how it should look like:
 +┊  ┊65┊  chats: any[];
 +┊  ┊66┊}
 +┊  ┊67┊
- ┊63┊68┊const ChatRoomScreen: React.FC<ChatRoomScreenParams> = ({
- ┊64┊69┊  history,
- ┊65┊70┊  chatId,
+ ┊63┊68┊const ChatRoomScreen: React.FC = () => {
 ```
 ```diff
 @@ -96,6 +101,37 @@
@@ -602,7 +598,7 @@ This is how it should look like:
  ┊101┊137┊    },
 ```
 
-##### Changed src&#x2F;components&#x2F;ChatsListScreen&#x2F;ChatsList.test.tsx
+<!-- ##### Changed src&#x2F;components&#x2F;ChatsListScreen&#x2F;ChatsList.test.tsx
 ```diff
 @@ -11,6 +11,7 @@
  ┊11┊11┊import { createBrowserHistory } from 'history';
@@ -634,14 +630,14 @@ This is how it should look like:
  ┊79┊80┊        result: {
  ┊80┊81┊          data: {
  ┊81┊82┊            chats: [
-```
+``` -->
 
 ##### Changed src&#x2F;components&#x2F;ChatsListScreen&#x2F;ChatsList.tsx
 ```diff
 @@ -4,8 +4,8 @@
  ┊ 4┊ 4┊import styled from 'styled-components';
  ┊ 5┊ 5┊import { useCallback } from 'react';
- ┊ 6┊ 6┊import { History } from 'history';
+ ┊ 6┊ 6┊import { useNavigate } from 'react-route-dom';
 -┊ 7┊  ┊import gql from 'graphql-tag';
  ┊ 8┊ 7┊import { useQuery } from '@apollo/react-hooks';
 +┊  ┊ 8┊import * as queries from '../../graphql/queries';
@@ -669,14 +665,14 @@ This is how it should look like:
 -┊74┊  ┊  }
 -┊75┊  ┊`;
 -┊76┊  ┊
- ┊77┊62┊interface ChatsListProps {
- ┊78┊63┊  history: History;
- ┊79┊64┊}
+ ┊77┊62┊
+ ┊78┊63┊
+ ┊79┊64┊
  ┊80┊65┊
- ┊81┊66┊const ChatsList: React.FC<ChatsListProps> = ({ history }) => {
+ ┊81┊66┊const ChatsList: React.FC = () => {
 -┊82┊  ┊  const { data } = useQuery<any>(getChatsQuery);
 +┊  ┊67┊  const { data } = useQuery<any>(queries.chats);
- ┊83┊68┊
+ ┊83┊68┊  const navigate = useNavigate();
  ┊84┊69┊  const navToChat = useCallback(
  ┊85┊70┊    (chat) => {
 ```
