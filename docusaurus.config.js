@@ -70,6 +70,10 @@ const config = {
             label: "Tutorial",
           },
           {
+            type: "docsVersionDropdown",
+            position: "left",
+          },
+          {
             href: "https://docusaurus.io/fr/docs",
             label: "Docusaurus",
             position: "right",
