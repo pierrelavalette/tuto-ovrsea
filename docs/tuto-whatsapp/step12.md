@@ -202,55 +202,7 @@ And then we will implement the `UsersList` component which is going to use the `
 
 #### [__Client__ Step 12.1: Add basic ChatCreationScreen](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/bbb1203275b8d385ad62f26dd6e104842128506a)
 
-##### Added src&#x2F;components&#x2F;UsersList.test.tsx
-```diff
-@@ -0,0 +1,45 @@
-+┊  ┊ 1┊import React from 'react';
-+┊  ┊ 2┊import { ApolloProvider } from '@apollo/react-hooks';
-+┊  ┊ 3┊import { cleanup, render, waitFor, screen } from '@testing-library/react';
-+┊  ┊ 4┊import { mockApolloClient } from '../test-helpers';
-+┊  ┊ 5┊import UsersList, { UsersListQuery } from './UsersList';
-+┊  ┊ 6┊
-+┊  ┊ 7┊describe('UsersList', () => {
-+┊  ┊ 8┊  afterEach(cleanup);
-+┊  ┊ 9┊
-+┊  ┊10┊  it('renders fetched users data', async () => {
-+┊  ┊11┊    const client = mockApolloClient([
-+┊  ┊12┊      {
-+┊  ┊13┊        request: { query: UsersListQuery },
-+┊  ┊14┊        result: {
-+┊  ┊15┊          data: {
-+┊  ┊16┊            users: [
-+┊  ┊17┊              {
-+┊  ┊18┊                __typename: 'User',
-+┊  ┊19┊                id: 1,
-+┊  ┊20┊                name: 'Charles Dickhead',
-+┊  ┊21┊                picture: 'https://localhost:4000/dick.jpg',
-+┊  ┊22┊              },
-+┊  ┊23┊            ],
-+┊  ┊24┊          },
-+┊  ┊25┊        },
-+┊  ┊26┊      },
-+┊  ┊27┊    ]);
-+┊  ┊28┊
-+┊  ┊29┊    {
-+┊  ┊30┊      const { container, getByTestId } = render(
-+┊  ┊31┊        <ApolloProvider client={client}>
-+┊  ┊32┊          <UsersList />
-+┊  ┊33┊        </ApolloProvider>
-+┊  ┊34┊      );
-+┊  ┊35┊
-+┊  ┊36┊      await waitFor(() => screen.getByTestId('name'));
-+┊  ┊37┊
-+┊  ┊38┊      expect(getByTestId('name')).toHaveTextContent('Charles Dickhead');
-+┊  ┊39┊      expect(getByTestId('picture')).toHaveAttribute(
-+┊  ┊40┊        'src',
-+┊  ┊41┊        'https://localhost:4000/dick.jpg'
-+┊  ┊42┊      );
-+┊  ┊43┊    }
-+┊  ┊44┊  });
-+┊  ┊45┊});
-```
+
 
 ##### Added src&#x2F;components&#x2F;UsersList.tsx
 ```diff
@@ -329,36 +281,7 @@ The list is likely to change when a new user signs-up. We will implement a subsc
 
 #### [__Client__ Step 12.1: Add basic ChatCreationScreen](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/bbb1203275b8d385ad62f26dd6e104842128506a)
 
-##### Added src&#x2F;components&#x2F;ChatCreationScreen&#x2F;ChatCreationNavbar.test.tsx
-```diff
-@@ -0,0 +1,26 @@
-+┊  ┊ 1┊import { createMemoryHistory } from 'history';
-+┊  ┊ 2┊import React from 'react';
-+┊  ┊ 3┊import { cleanup, render, fireEvent, waitFor } from '@testing-library/react';
-+┊  ┊ 4┊import ChatCreationNavbar from './ChatCreationNavbar';
-+┊  ┊ 5┊
-+┊  ┊ 6┊describe('ChatCreationNavbar', () => {
-+┊  ┊ 7┊  afterEach(cleanup);
-+┊  ┊ 8┊
-+┊  ┊ 9┊  it('goes back on arrow click', async () => {
-+┊  ┊10┊    const history = createMemoryHistory();
-+┊  ┊11┊
-+┊  ┊12┊    history.push('/new-chat');
-+┊  ┊13┊
-+┊  ┊14┊    await waitFor(() => expect(history.location.pathname).toEqual('/new-chat'));
-+┊  ┊15┊
-+┊  ┊16┊    {
-+┊  ┊17┊      const { container, getByTestId } = render(
-+┊  ┊18┊        <ChatCreationNavbar history={history} />
-+┊  ┊19┊      );
-+┊  ┊20┊
-+┊  ┊21┊      fireEvent.click(getByTestId('back-button'));
-+┊  ┊22┊
-+┊  ┊23┊      await waitFor(() => expect(history.location.pathname).toEqual('/chats'));
-+┊  ┊24┊    }
-+┊  ┊25┊  });
-+┊  ┊26┊});
-```
+
 
 ##### Added src&#x2F;components&#x2F;ChatCreationScreen&#x2F;ChatCreationNavbar.tsx
 ```diff
@@ -368,7 +291,7 @@ The list is likely to change when a new user signs-up. We will implement a subsc
 +┊  ┊ 3┊import React from 'react';
 +┊  ┊ 4┊import { useCallback } from 'react';
 +┊  ┊ 5┊import styled from 'styled-components';
-+┊  ┊ 6┊import { History } from 'history';
++┊  ┊ 6┊import { useNavigate } from 'react-router-dom';
 +┊  ┊ 7┊
 +┊  ┊ 8┊const Container = styled(Toolbar)`
 +┊  ┊ 9┊  display: flex;
@@ -388,14 +311,12 @@ The list is likely to change when a new user signs-up. We will implement a subsc
 +┊  ┊23┊  flex: 1;
 +┊  ┊24┊`;
 +┊  ┊25┊
-+┊  ┊26┊interface ChildComponentProps {
-+┊  ┊27┊  history: History;
-+┊  ┊28┊}
 +┊  ┊29┊
-+┊  ┊30┊const ChatCreationNavbar: React.FC<ChildComponentProps> = ({ history }) => {
++┊  ┊30┊const ChatCreationNavbar: React.FC = () => {
++┊  ┊30┊  const navigate = useNavigate();
 +┊  ┊31┊  const navBack = useCallback(() => {
-+┊  ┊32┊    history.replace('/chats');
-+┊  ┊33┊  }, [history]);
++┊  ┊32┊    navigate('/chats', { replace: true });
++┊  ┊33┊  }, [navigate]);
 +┊  ┊34┊
 +┊  ┊35┊  return (
 +┊  ┊36┊    <Container>
@@ -417,7 +338,6 @@ The list is likely to change when a new user signs-up. We will implement a subsc
 +┊  ┊ 2┊import styled from 'styled-components';
 +┊  ┊ 3┊import UsersList from '../UsersList';
 +┊  ┊ 4┊import ChatCreationNavbar from './ChatCreationNavbar';
-+┊  ┊ 5┊import { History } from 'history';
 +┊  ┊ 6┊
 +┊  ┊ 7┊// eslint-disable-next-line
 +┊  ┊ 8┊const Container = styled.div`
@@ -430,13 +350,10 @@ The list is likely to change when a new user signs-up. We will implement a subsc
 +┊  ┊15┊  height: calc(100% - 56px);
 +┊  ┊16┊`;
 +┊  ┊17┊
-+┊  ┊18┊interface ChildComponentProps {
-+┊  ┊19┊  history: History;
-+┊  ┊20┊}
 +┊  ┊21┊
-+┊  ┊22┊const ChatCreationScreen: React.FC<ChildComponentProps> = ({ history }) => (
++┊  ┊22┊const ChatCreationScreen: React.FC = () => (
 +┊  ┊23┊  <div>
-+┊  ┊24┊    <ChatCreationNavbar history={history} />
++┊  ┊24┊    <ChatCreationNavbar />
 +┊  ┊25┊    <UsersList />
 +┊  ┊26┊  </div>
 +┊  ┊27┊);
@@ -459,20 +376,25 @@ The screen will be available under the route `/new-chat`. The new route will be 
  ┊ 9┊ 9┊import ChatRoomScreen from './components/ChatRoomScreen';
  ┊10┊10┊import ChatsListScreen from './components/ChatsListScreen';
 +┊  ┊11┊import ChatCreationScreen from './components/ChatCreationScreen';
- ┊11┊12┊import AnimatedSwitch from './components/AnimatedSwitch';
- ┊12┊13┊import { withAuth } from './services/auth.service';
+ ┊11┊12┊import { Routes } from 'react-router-dom';
+ ┊12┊13┊import { WithAuth } from './services/auth.service';
  ┊13┊14┊
 ```
 ```diff
 @@ -26,6 +27,8 @@
- ┊26┊27┊          )
- ┊27┊28┊        )}
+ ┊26┊27┊          <WithAuthProvider/>
+ ┊27┊28┊        }
  ┊28┊29┊      />
 +┊  ┊30┊
-+┊  ┊31┊      <Route exact path="/new-chat" component={withAuth(ChatCreationScreen)} />
- ┊29┊32┊    </AnimatedSwitch>
- ┊30┊33┊    <Route exact path="/" render={redirectToChats} />
- ┊31┊34┊  </BrowserRouter>
++┊  ┊31┊      <Route
++┊  ┊31┊        path="/new-chat"
++┊  ┊31┊        element={
++┊  ┊31┊          <WithAuth>
++┊  ┊31┊            <ChatCreationScreen />
++┊  ┊31┊          <WithAuth />
++┊  ┊31┊        }
++┊  ┊31┊      />
+ ┊30┊33┊      <Route
 ```
 
 [}]: #
@@ -483,39 +405,6 @@ the `/new-chat` route will be accessible directly from the main `ChatsListScreen
 
 #### [__Client__ Step 12.1: Add basic ChatCreationScreen](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/bbb1203275b8d385ad62f26dd6e104842128506a)
 
-##### Added src&#x2F;components&#x2F;ChatsListScreen&#x2F;AddChatButton.test.tsx
-```diff
-@@ -0,0 +1,29 @@
-+┊  ┊ 1┊import { createMemoryHistory } from 'history';
-+┊  ┊ 2┊import { ApolloProvider } from '@apollo/react-hooks';
-+┊  ┊ 3┊import React from 'react';
-+┊  ┊ 4┊import { cleanup, render, fireEvent, waitFor } from '@testing-library/react';
-+┊  ┊ 5┊import AddChatButton from './AddChatButton';
-+┊  ┊ 6┊import { mockApolloClient } from '../../test-helpers';
-+┊  ┊ 7┊
-+┊  ┊ 8┊describe('AddChatButton', () => {
-+┊  ┊ 9┊  afterEach(cleanup);
-+┊  ┊10┊
-+┊  ┊11┊  it('goes back on arrow click', async () => {
-+┊  ┊12┊    const history = createMemoryHistory();
-+┊  ┊13┊    const client = mockApolloClient();
-+┊  ┊14┊
-+┊  ┊15┊    {
-+┊  ┊16┊      const { container, getByTestId } = render(
-+┊  ┊17┊        <ApolloProvider client={client}>
-+┊  ┊18┊          <AddChatButton history={history} />
-+┊  ┊19┊        </ApolloProvider>
-+┊  ┊20┊      );
-+┊  ┊21┊
-+┊  ┊22┊      fireEvent.click(getByTestId('new-chat-button'));
-+┊  ┊23┊
-+┊  ┊24┊      await waitFor(() =>
-+┊  ┊25┊        expect(history.location.pathname).toEqual('/new-chat')
-+┊  ┊26┊      );
-+┊  ┊27┊    }
-+┊  ┊28┊  });
-+┊  ┊29┊});
-```
 
 ##### Added src&#x2F;components&#x2F;ChatsListScreen&#x2F;AddChatButton.tsx
 ```diff
@@ -524,7 +413,7 @@ the `/new-chat` route will be accessible directly from the main `ChatsListScreen
 +┊  ┊ 2┊import ChatIcon from '@material-ui/icons/Chat';
 +┊  ┊ 3┊import React from 'react';
 +┊  ┊ 4┊import styled from 'styled-components';
-+┊  ┊ 5┊import { History } from 'history';
++┊  ┊ 5┊import { useNavigate } from 'react-router-dom';
 +┊  ┊ 6┊
 +┊  ┊ 7┊const Container = styled.div`
 +┊  ┊ 8┊  position: fixed;
@@ -540,13 +429,11 @@ the `/new-chat` route will be accessible directly from the main `ChatsListScreen
 +┊  ┊18┊    color: white;
 +┊  ┊19┊  }
 +┊  ┊20┊`;
-+┊  ┊21┊interface ChildComponentProps {
-+┊  ┊22┊  history: History;
-+┊  ┊23┊}
 +┊  ┊24┊
-+┊  ┊25┊const AddChatButton: React.FC<ChildComponentProps> = ({ history }) => {
++┊  ┊25┊const AddChatButton: React.FC = () => {
++┊  ┊25┊  const navigate = useNavigate();
 +┊  ┊26┊  const onClick = () => {
-+┊  ┊27┊    history.push('/new-chat');
++┊  ┊27┊    navigate('/new-chat');
 +┊  ┊28┊  };
 +┊  ┊29┊
 +┊  ┊30┊  return (
@@ -578,7 +465,6 @@ And then we will render it in the `ChatsListScreen`:
 @@ -3,6 +3,7 @@
  ┊3┊3┊import ChatsList from './ChatsList';
  ┊4┊4┊import styled from 'styled-components';
- ┊5┊5┊import { History } from 'history';
 +┊ ┊6┊import AddChatButton from './AddChatButton';
  ┊6┊7┊
  ┊7┊8┊const Container = styled.div`
@@ -587,9 +473,9 @@ And then we will render it in the `ChatsListScreen`:
 ```diff
 @@ -16,6 +17,7 @@
  ┊16┊17┊  <Container>
- ┊17┊18┊    <ChatsNavbar history={history} />
- ┊18┊19┊    <ChatsList history={history} />
-+┊  ┊20┊    <AddChatButton history={history} />
+ ┊17┊18┊    <ChatsNavbar />
+ ┊18┊19┊    <ChatsList />
++┊  ┊20┊    <AddChatButton />
  ┊19┊21┊  </Container>
  ┊20┊22┊);
  ┊21┊23┊
@@ -661,7 +547,7 @@ For now we can only observe the users list. Our goal now is to be able to start 
  ┊39┊40┊type Subscription {
 ```
 
-##### Added tests&#x2F;mutations&#x2F;\__snapshots__&#x2F;addChat.test.ts.snap
+<!-- ##### Added tests&#x2F;mutations&#x2F;\__snapshots__&#x2F;addChat.test.ts.snap
 ```diff
 @@ -0,0 +1,52 @@
 +┊  ┊ 1┊// Jest Snapshot v1, https://goo.gl/fbAQLP
@@ -812,7 +698,7 @@ For now we can only observe the users list. Our goal now is to be able to start 
 +┊  ┊89┊});
 ```
 
-[}]: #
+[}]: # -->
 
 To use the new mutation, we will define a new callback called `onUserPick` in the `UsersList` so it can be used from the `ChatCreationScreen`:
 
@@ -820,71 +706,7 @@ To use the new mutation, we will define a new callback called `onUserPick` in th
 
 #### [__Client__ Step 12.2: Create chat on user pick](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/808313e16d7bb7fce1cf5571de278b2e72f505da)
 
-##### Changed src&#x2F;components&#x2F;UsersList.test.tsx
-```diff
-@@ -1,6 +1,12 @@
- ┊ 1┊ 1┊import React from 'react';
- ┊ 2┊ 2┊import { ApolloProvider } from '@apollo/react-hooks';
--┊ 3┊  ┊import { cleanup, render, waitFor, screen } from '@testing-library/react';
-+┊  ┊ 3┊import {
-+┊  ┊ 4┊  cleanup,
-+┊  ┊ 5┊  render,
-+┊  ┊ 6┊  fireEvent,
-+┊  ┊ 7┊  waitFor,
-+┊  ┊ 8┊  screen,
-+┊  ┊ 9┊} from '@testing-library/react';
- ┊ 4┊10┊import { mockApolloClient } from '../test-helpers';
- ┊ 5┊11┊import UsersList, { UsersListQuery } from './UsersList';
- ┊ 6┊12┊
-```
-```diff
-@@ -42,4 +48,45 @@
- ┊42┊48┊      );
- ┊43┊49┊    }
- ┊44┊50┊  });
-+┊  ┊51┊
-+┊  ┊52┊  it('triggers onUserPick() callback on user-item click', async () => {
-+┊  ┊53┊    const client = mockApolloClient([
-+┊  ┊54┊      {
-+┊  ┊55┊        request: { query: UsersListQuery },
-+┊  ┊56┊        result: {
-+┊  ┊57┊          data: {
-+┊  ┊58┊            users: [
-+┊  ┊59┊              {
-+┊  ┊60┊                __typename: 'User',
-+┊  ┊61┊                id: 1,
-+┊  ┊62┊                name: 'Charles Dickhead',
-+┊  ┊63┊                picture: 'https://localhost:4000/dick.jpg',
-+┊  ┊64┊              },
-+┊  ┊65┊            ],
-+┊  ┊66┊          },
-+┊  ┊67┊        },
-+┊  ┊68┊      },
-+┊  ┊69┊    ]);
-+┊  ┊70┊
-+┊  ┊71┊    const onUserPick = jest.fn(() => {});
-+┊  ┊72┊
-+┊  ┊73┊    {
-+┊  ┊74┊      const { container, getByTestId } = render(
-+┊  ┊75┊        <ApolloProvider client={client}>
-+┊  ┊76┊          <UsersList onUserPick={onUserPick} />
-+┊  ┊77┊        </ApolloProvider>
-+┊  ┊78┊      );
-+┊  ┊79┊
-+┊  ┊80┊      await waitFor(() => screen.getByTestId('user'));
-+┊  ┊81┊
-+┊  ┊82┊      fireEvent.click(getByTestId('user'));
-+┊  ┊83┊
-+┊  ┊84┊      await waitFor(() => expect(onUserPick.mock.calls.length).toBe(1));
-+┊  ┊85┊
-+┊  ┊86┊      expect(onUserPick.mock.calls[0][0].name).toEqual('Charles Dickhead');
-+┊  ┊87┊      expect(onUserPick.mock.calls[0][0].picture).toEqual(
-+┊  ┊88┊        'https://localhost:4000/dick.jpg'
-+┊  ┊89┊      );
-+┊  ┊90┊    }
-+┊  ┊91┊  });
- ┊45┊92┊});
-```
+
 
 ##### Changed src&#x2F;components&#x2F;UsersList.tsx
 ```diff
@@ -949,7 +771,7 @@ In the `ChatCreationScreen/index.tsx` module, we will define an `AddChat` docume
 +┊  ┊ 5┊import * as fragments from '../../graphql/fragments';
  ┊ 3┊ 6┊import UsersList from '../UsersList';
  ┊ 4┊ 7┊import ChatCreationNavbar from './ChatCreationNavbar';
- ┊ 5┊ 8┊import { History } from 'history';
++┊  ┊ 8┊import { useNavigate } from 'react-router-dom';
 +┊  ┊ 9┊import { useAddChatMutation } from '../../graphql/types';
  ┊ 6┊10┊
  ┊ 7┊11┊// eslint-disable-next-line
@@ -969,17 +791,15 @@ In the `ChatCreationScreen/index.tsx` module, we will define an `AddChat` docume
 +┊  ┊28┊  ${fragments.chat}
 +┊  ┊29┊`;
 +┊  ┊30┊
- ┊18┊31┊interface ChildComponentProps {
- ┊19┊32┊  history: History;
- ┊20┊33┊}
  ┊21┊34┊
--┊22┊  ┊const ChatCreationScreen: React.FC<ChildComponentProps> = ({ history }) => (
+-┊22┊  ┊const ChatCreationScreen: React.FC = () => (
 -┊23┊  ┊  <div>
--┊24┊  ┊    <ChatCreationNavbar history={history} />
+-┊24┊  ┊    <ChatCreationNavbar />
 -┊25┊  ┊    <UsersList />
 -┊26┊  ┊  </div>
 -┊27┊  ┊);
-+┊  ┊35┊const ChatCreationScreen: React.FC<ChildComponentProps> = ({ history }) => {
++┊  ┊35┊const ChatCreationScreen: React.FC = () => {
++┊  ┊36┊  const navigate = useNavigate();
 +┊  ┊36┊  const [addChat] = useAddChatMutation();
 +┊  ┊37┊
 +┊  ┊38┊  const onUserPick = useCallback(
@@ -1000,15 +820,15 @@ In the `ChatCreationScreen/index.tsx` module, we will define an `AddChat` docume
 +┊  ┊53┊        },
 +┊  ┊54┊      }).then((result) => {
 +┊  ┊55┊        if (result && result.data !== null) {
-+┊  ┊56┊          history.push(`/chats/${result.data!.addChat!.id}`);
++┊  ┊56┊          navigate(`/chats/${result.data!.addChat!.id}`);
 +┊  ┊57┊        }
 +┊  ┊58┊      }),
-+┊  ┊59┊    [addChat, history]
++┊  ┊59┊    [addChat, navigate]
 +┊  ┊60┊  );
 +┊  ┊61┊
 +┊  ┊62┊  return (
 +┊  ┊63┊    <div>
-+┊  ┊64┊      <ChatCreationNavbar history={history} />
++┊  ┊64┊      <ChatCreationNavbar />
 +┊  ┊65┊      <UsersList onUserPick={onUserPick} />
 +┊  ┊66┊    </div>
 +┊  ┊67┊  );
@@ -1124,7 +944,7 @@ And then we will update the `cache.service` to write the broadcasted chat to the
 ```diff
 @@ -7,6 +7,7 @@
  ┊ 7┊ 7┊import ChatCreationNavbar from './ChatCreationNavbar';
- ┊ 8┊ 8┊import { History } from 'history';
+ ┊ 8┊ 8┊import { useNavigate } from 'react-router-dom';
  ┊ 9┊ 9┊import { useAddChatMutation } from '../../graphql/types';
 +┊  ┊10┊import { writeChat } from '../../services/cache.service';
  ┊10┊11┊
@@ -1143,7 +963,7 @@ And then we will update the `cache.service` to write the broadcasted chat to the
 +┊  ┊59┊        },
  ┊54┊60┊      }).then((result) => {
  ┊55┊61┊        if (result && result.data !== null) {
- ┊56┊62┊          history.push(`/chats/${result.data!.addChat!.id}`);
+ ┊56┊62┊          navigate(`/chats/${result.data!.addChat!.id}`);
 ```
 
 ##### Added src&#x2F;graphql&#x2F;subscriptions&#x2F;chatAdded.subscription.ts
@@ -1299,7 +1119,7 @@ In the back-end, let’s implement the `removeChat` mutation. The chat can only 
  ┊40┊41┊type Subscription {
 ```
 
-##### Added tests&#x2F;mutations&#x2F;removeChat.test.ts
+<!-- ##### Added tests&#x2F;mutations&#x2F;removeChat.test.ts
 ```diff
 @@ -0,0 +1,52 @@
 +┊  ┊ 1┊import { createTestClient } from 'apollo-server-testing';
@@ -1356,7 +1176,7 @@ In the back-end, let’s implement the `removeChat` mutation. The chat can only 
 +┊  ┊52┊});
 ```
 
-[}]: #
+[}]: # -->
 
 In the client app, a chat could be removed directly from the `ChatRoomScreen`. On the top right corner, right on the navbar, we will add a dispose button that will call the `removeChat` mutation. Just like we did before, we will define the mutation document with `graphql-tag` and generate the correlated hook with CodeGen:
 
@@ -1364,124 +1184,7 @@ In the client app, a chat could be removed directly from the `ChatRoomScreen`. O
 
 #### [__Client__ Step 12.4: Add chat removal function](https://github.com/Urigo/WhatsApp-Clone-Client-React/commit/5491cf9ed0352a7a01cb773cdc3d62f2beb4bd64)
 
-##### Changed src&#x2F;components&#x2F;ChatRoomScreen&#x2F;ChatNavbar.test.tsx
-```diff
-@@ -1,12 +1,17 @@
- ┊ 1┊ 1┊import { createMemoryHistory } from 'history';
- ┊ 2┊ 2┊import React from 'react';
-+┊  ┊ 3┊import { ApolloProvider } from '@apollo/react-hooks';
- ┊ 3┊ 4┊import { cleanup, render, waitFor, fireEvent } from '@testing-library/react';
-+┊  ┊ 5┊import { mockApolloClient } from '../../test-helpers';
- ┊ 4┊ 6┊import ChatNavbar from './ChatNavbar';
-+┊  ┊ 7┊import { RemoveChatDocument } from '../../graphql/types';
- ┊ 5┊ 8┊
- ┊ 6┊ 9┊describe('ChatNavbar', () => {
- ┊ 7┊10┊  afterEach(cleanup);
- ┊ 8┊11┊
- ┊ 9┊12┊  it('renders chat data', () => {
-+┊  ┊13┊    const client = mockApolloClient();
-+┊  ┊14┊
- ┊10┊15┊    const time = new Date('1 Jan 2019 GMT');
- ┊11┊16┊    const chat = {
- ┊12┊17┊      id: '1',
-```
-```diff
-@@ -30,7 +35,9 @@
- ┊30┊35┊
- ┊31┊36┊    {
- ┊32┊37┊      const { container, getByTestId } = render(
--┊33┊  ┊        <ChatNavbar chat={chat} history={history} />
-+┊  ┊38┊        <ApolloProvider client={client}>
-+┊  ┊39┊          <ChatNavbar chat={chat} history={history} />
-+┊  ┊40┊        </ApolloProvider>
- ┊34┊41┊      );
- ┊35┊42┊
- ┊36┊43┊      expect(getByTestId('chat-name')).toHaveTextContent('Foo Bar');
-```
-```diff
-@@ -42,6 +49,8 @@
- ┊42┊49┊  });
- ┊43┊50┊
- ┊44┊51┊  it('goes back on arrow click', async () => {
-+┊  ┊52┊    const client = mockApolloClient();
-+┊  ┊53┊
- ┊45┊54┊    const time = new Date('1 Jan 2019 GMT');
- ┊46┊55┊    const chat = {
- ┊47┊56┊      id: '1',
-```
-```diff
-@@ -69,7 +78,9 @@
- ┊69┊78┊
- ┊70┊79┊    {
- ┊71┊80┊      const { container, getByTestId } = render(
--┊72┊  ┊        <ChatNavbar chat={chat} history={history} />
-+┊  ┊81┊        <ApolloProvider client={client}>
-+┊  ┊82┊          <ChatNavbar chat={chat} history={history} />
-+┊  ┊83┊        </ApolloProvider>
- ┊73┊84┊      );
- ┊74┊85┊
- ┊75┊86┊      fireEvent.click(getByTestId('back-button'));
-```
-```diff
-@@ -77,4 +88,57 @@
- ┊ 77┊ 88┊      await waitFor(() => expect(history.location.pathname).toEqual('/chats'));
- ┊ 78┊ 89┊    }
- ┊ 79┊ 90┊  });
-+┊   ┊ 91┊
-+┊   ┊ 92┊  it('goes back on chat removal', async () => {
-+┊   ┊ 93┊    const client = mockApolloClient([
-+┊   ┊ 94┊      {
-+┊   ┊ 95┊        request: {
-+┊   ┊ 96┊          query: RemoveChatDocument,
-+┊   ┊ 97┊          variables: { chatId: '1' },
-+┊   ┊ 98┊        },
-+┊   ┊ 99┊        result: {
-+┊   ┊100┊          data: {
-+┊   ┊101┊            removeChat: '1',
-+┊   ┊102┊          },
-+┊   ┊103┊        },
-+┊   ┊104┊      },
-+┊   ┊105┊    ]);
-+┊   ┊106┊
-+┊   ┊107┊    const time = new Date('1 Jan 2019 GMT');
-+┊   ┊108┊    const chat = {
-+┊   ┊109┊      id: '1',
-+┊   ┊110┊      name: 'Foo Bar',
-+┊   ┊111┊      picture: 'https://localhost:4000/picture.jpg',
-+┊   ┊112┊      messages: [
-+┊   ┊113┊        {
-+┊   ┊114┊          id: '1',
-+┊   ┊115┊          content: 'foo',
-+┊   ┊116┊          createdAt: time,
-+┊   ┊117┊        },
-+┊   ┊118┊        {
-+┊   ┊119┊          id: '2',
-+┊   ┊120┊          content: 'bar',
-+┊   ┊121┊          createdAt: time,
-+┊   ┊122┊        },
-+┊   ┊123┊      ],
-+┊   ┊124┊    };
-+┊   ┊125┊
-+┊   ┊126┊    const history = createMemoryHistory();
-+┊   ┊127┊
-+┊   ┊128┊    history.push('/chats/1');
-+┊   ┊129┊
-+┊   ┊130┊    await waitFor(() => expect(history.location.pathname).toEqual('/chats/1'));
-+┊   ┊131┊
-+┊   ┊132┊    {
-+┊   ┊133┊      const { container, getByTestId } = render(
-+┊   ┊134┊        <ApolloProvider client={client}>
-+┊   ┊135┊          <ChatNavbar chat={chat} history={history} />
-+┊   ┊136┊        </ApolloProvider>
-+┊   ┊137┊      );
-+┊   ┊138┊
-+┊   ┊139┊      fireEvent.click(getByTestId('delete-button'));
-+┊   ┊140┊
-+┊   ┊141┊      await waitFor(() => expect(history.location.pathname).toEqual('/chats'));
-+┊   ┊142┊    }
-+┊   ┊143┊  });
- ┊ 80┊144┊});
-```
+
 
 ##### Changed src&#x2F;components&#x2F;ChatRoomScreen&#x2F;ChatNavbar.tsx
 ```diff
@@ -1494,7 +1197,7 @@ In the client app, a chat could be removed directly from the `ChatRoomScreen`. O
  ┊ 4┊ 6┊import React from 'react';
  ┊ 5┊ 7┊import { useCallback } from 'react';
  ┊ 6┊ 8┊import styled from 'styled-components';
- ┊ 7┊ 9┊import { History } from 'history';
+ ┊ 7┊ 9┊import { useNavigate } from 'react-router-dom';
 +┊  ┊10┊import { useRemoveChatMutation } from '../../graphql/types';
  ┊ 8┊11┊
  ┊ 9┊12┊const Container = styled(Toolbar)`
@@ -1531,7 +1234,6 @@ In the client app, a chat could be removed directly from the `ChatRoomScreen`. O
 +┊  ┊54┊`;
 +┊  ┊55┊
  ┊37┊56┊interface ChatNavbarProps {
- ┊38┊57┊  history: History;
 -┊39┊  ┊  chat?: {
 +┊  ┊58┊  chat: {
  ┊40┊59┊    picture?: string | null;
@@ -1540,7 +1242,8 @@ In the client app, a chat could be removed directly from the `ChatRoomScreen`. O
  ┊42┊62┊  };
  ┊43┊63┊}
  ┊44┊64┊
- ┊45┊65┊const ChatNavbar: React.FC<ChatNavbarProps> = ({ chat, history }) => {
+ ┊45┊65┊const ChatNavbar: React.FC<ChatNavbarProps> = ({ chat }) => {
+ ┊45┊65┊  const navigate : useNavigate();
 +┊  ┊66┊  const [removeChat] = useRemoveChatMutation({
 +┊  ┊67┊    variables: {
 +┊  ┊68┊      chatId: chat.id,
@@ -1549,13 +1252,13 @@ In the client app, a chat could be removed directly from the `ChatRoomScreen`. O
 +┊  ┊71┊
 +┊  ┊72┊  const handleRemoveChat = useCallback(() => {
 +┊  ┊73┊    removeChat().then(() => {
-+┊  ┊74┊      history.replace('/chats');
++┊  ┊74┊      navigate('/chats', { replace: true});
 +┊  ┊75┊    });
-+┊  ┊76┊  }, [removeChat, history]);
++┊  ┊76┊  }, [removeChat, navigate]);
 +┊  ┊77┊
  ┊46┊78┊  const navBack = useCallback(() => {
- ┊47┊79┊    history.replace('/chats');
- ┊48┊80┊  }, [history]);
+ ┊47┊79┊    navigate('/chats', { replace: true});
+ ┊48┊80┊  }, [navigate]);
 ```
 ```diff
 @@ -58,6 +90,11 @@
@@ -1578,8 +1281,8 @@ In the client app, a chat could be removed directly from the `ChatRoomScreen`. O
  ┊ 97┊ 97┊
  ┊ 98┊ 98┊  return (
  ┊ 99┊ 99┊    <Container>
--┊100┊   ┊      <ChatNavbar chat={chat} history={history} />
-+┊   ┊100┊      {chat?.id && <ChatNavbar chat={chat} history={history} />}
+-┊100┊   ┊      <ChatNavbar chat={chat} />
++┊   ┊100┊      {chat?.id && <ChatNavbar chat={chat} />}
  ┊101┊101┊      {chat?.messages && <MessagesList messages={chat.messages} />}
  ┊102┊102┊      <MessageInput onSendMessage={onSendMessage} />
  ┊103┊103┊    </Container>
@@ -1784,7 +1487,7 @@ which means that even if you didn’t actively remove the chat, you will still b
 ```diff
 @@ -8,6 +8,7 @@
  ┊ 8┊ 8┊import styled from 'styled-components';
- ┊ 9┊ 9┊import { History } from 'history';
+ ┊ 9┊ 9┊import { useNavigate } from 'react-router-dom';
  ┊10┊10┊import { useRemoveChatMutation } from '../../graphql/types';
 +┊  ┊11┊import { eraseChat } from '../../services/cache.service';
  ┊11┊12┊
@@ -1812,7 +1515,7 @@ which means that even if you didn’t actively remove the chat, you will still b
  ┊1┊1┊import gql from 'graphql-tag';
  ┊2┊2┊import React from 'react';
  ┊3┊3┊import { useCallback } from 'react';
-+┊ ┊4┊import { Redirect } from 'react-router-dom';
++┊ ┊4┊import { Navigate } from 'react-router-dom';
  ┊4┊5┊import styled from 'styled-components';
  ┊5┊6┊import ChatNavbar from './ChatNavbar';
  ┊6┊7┊import MessageInput from './MessageInput';
@@ -1824,12 +1527,12 @@ which means that even if you didn’t actively remove the chat, you will still b
  ┊ 97┊ 98┊
 +┊   ┊ 99┊  // Chat was probably removed from cache by the subscription handler
 +┊   ┊100┊  if (!chat) {
-+┊   ┊101┊    return <Redirect to="/chats" />;
++┊   ┊101┊    return <Navigate to="/chats" />;
 +┊   ┊102┊  }
 +┊   ┊103┊
  ┊ 98┊104┊  return (
  ┊ 99┊105┊    <Container>
- ┊100┊106┊      {chat?.id && <ChatNavbar chat={chat} history={history} />}
+ ┊100┊106┊      {chat?.id && <ChatNavbar chat={chat} />}
 ```
 
 [}]: #
