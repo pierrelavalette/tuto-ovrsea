@@ -72,7 +72,7 @@ Although the client can be used directly and integrated into any UI framework, i
 For that we will use Apollo's React Hooks package called [`@apollo/react-hooks`](https://github.com/apollographql/react-apollo) which includes a set of
 [React hooks](https://reactjs.org/docs/hooks-intro.html) that can connect between our Apollo-Client and target React.Component:
 
-    $ yarn add @apollo/react-hooks graphql-tag graphql
+    $ yarn add @apollo/react-hooks@3.1.5 graphql-tag graphql@15.0.0
 
 With `@apollo/react-hooks` we can use the `useQuery()` hook to fetch data from our GraphQL API.
 The `graphql-tag` package is used to parse the GraphQL string to an [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree),
