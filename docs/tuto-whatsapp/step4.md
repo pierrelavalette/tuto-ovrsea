@@ -245,8 +245,8 @@ Essentially GraphQL is connected into an HTTP endpoint, usually under `POST /gra
 Luckily, we don't have to implement that. A team called [Apollo](https://www.apollographql.com/) already did it for us so that we can use their implementation.
 We will install the required packages:
 
-    $ yarn add apollo-server-express graphql
-    $ yarn add --dev @types/graphql
+    $ yarn add apollo-server-express@2.13.1 graphql@15.0.0
+    $ yarn add --dev @types/graphql@14.5.0
 
 - [`graphql`](https://www.npmjs.com/package/graphql) - The core package of GraphQL that includes the resolvers for basic data-types.
 - [`apollo-server-express`](https://www.npmjs.com/package/apollo-server-express) - Apollo's implementation for the GraphQL Express REST endpoint.
