@@ -124,7 +124,7 @@ Our server is gonna use the following `tsconfig.json` file, feel free to make th
 
 [}]: #
 
-Now let's run `tsc` and see what happens.
+Now let's run ` yarn tsc` and see what happens.
 
 We've got a new `index.js` file!  Now let's run it by running `node index.js`.
 
