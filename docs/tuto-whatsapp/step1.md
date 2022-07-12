@@ -338,6 +338,33 @@ If you know that your app would run only on newer browsers or a Node environment
 
 For the full set of options, check out the [official docs](https://www.typescriptlang.org/docs/handbook/compiler-options.html);
 
+We won't care about performance in this tutorial, so let's just remove performance-related lines in our index file:
+
+##### Updated src&#x2F;index.tsx
+```diff
+@@ -0,0 +1,17 @@
+ ┊  ┊ 1┊import React from 'react';
+ ┊  ┊ 2┊import ReactDOM from 'react-dom';
+ ┊  ┊ 3┊import './index.css';
+ ┊  ┊ 4┊import App from './App';
+-┊  ┊ 5┊import * as serviceWorker from './serviceWorker';
+ ┊  ┊ 6┊
+ ┊  ┊ 7┊ReactDOM.render(
+ ┊  ┊ 8┊  <React.StrictMode>
+ ┊  ┊ 9┊    <App />
+ ┊  ┊10┊  </React.StrictMode>,
+ ┊  ┊11┊  document.getElementById('root')
+ ┊  ┊12┊);
+ ┊  ┊13┊
+-┊  ┊14┊// If you want your app to work offline and load faster, you can change
+-┊  ┊15┊// unregister() to register() below. Note this comes with some pitfalls.
+-┊  ┊16┊// Learn more about service workers: https://bit.ly/CRA-PWA
+-┊  ┊17┊serviceWorker.unregister();
+```
+
+[}]: #
+
+
 Now, let's look at our App's code in `src/App.tsx`:
 
 [{]: <helper> (diffStep "root" files="App.tsx" module="client")
